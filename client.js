@@ -1,6 +1,11 @@
 export default class Client {
-    constructor(name) {
-        this.peer = new Peer(name);
+    constructor(id) {
+        if (id == undefined) {
+            // No parameter passed, generate id
+            id = Client.id_gen()
+        }
+        console.log(`Gen ${id}`)
+        this.peer = new Peer(id);
         this.conns = [];
 
         this.peer.on('open', function (id) {
@@ -19,6 +24,14 @@ export default class Client {
         });
 
         console.log("Client initiated");
+    }
+
+    static id_gen() {
+        // Source: https://stackoverflow.com/questions/6860853/generate-random-string-for-div-id
+        var S4 = function () {
+            return (((1 + Math.random()) * 0x10000) | 0).toString(16).substring(1);
+        };
+        return (S4() + S4() + "-" + S4() + "-" + S4() + "-" + S4() + "-" + S4() + S4() + S4());
     }
 
     connect(id) {
