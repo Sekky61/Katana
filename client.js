@@ -4,26 +4,42 @@ export default class Client {
             // No parameter passed, generate id
             id = Client.id_gen()
         }
-        console.log(`Gen ${id}`)
         this.peer = new Peer(id);
         this.conns = [];
+        this.files = [];
 
         this.peer.on('open', function (id) {
             console.log('My peer ID is: ' + id);
         });
 
+        // Passive connection opened
         this.peer.on('connection', (conn) => {
-            console.log('Received new connection: ' + conn);
+            console.log('3 Received new connection:');
             console.dir(conn);
 
             this.conns.push(conn);
             conn.on('data', function (data) {
-                console.log('Received', data);
+                console.log('2 Received', data);
             });
-            conns_dump.innerText = this.conns.toString();
+
+            conn.on("open", () => {
+                // Send file offer
+                let offer = this.get_file_offer();
+                conn.send(offer)
+            });
         });
 
+        this.peer.on('error', function (err) { console.log("Error"); console.dir(err) });
+
         console.log("Client initiated");
+    }
+
+    add_file(file_meta) {
+        this.files.push(file_meta)
+    }
+
+    get_file_offer() {
+        return { msg: "file_offer", files: this.files }
     }
 
     static id_gen() {
@@ -31,22 +47,36 @@ export default class Client {
         var S4 = function () {
             return (((1 + Math.random()) * 0x10000) | 0).toString(16).substring(1);
         };
-        return (S4() + S4() + "-" + S4() + "-" + S4() + "-" + S4() + "-" + S4() + S4() + S4());
+        return (S4() + "-" + S4() + "-" + S4());
     }
 
+    get_status() {
+        if (this.conns.length == 0) {
+            return "No connection";
+        } else {
+            let con_ids = this.conns.map((conn) => {
+                return conn.provider._id;
+            });
+            return `${this.conns.length} connection(s): ${con_ids}`;
+        }
+    }
+
+    // Connect to peer with id
+    // todo callback for connection
     connect(id) {
-        // returns DataConnection
         let client_ref = this;
-        let conn = client_ref.peer.connect(id); // options { meta_name }
+        let conn = this.peer.connect(id, { reliable: true, meta_name: "Metaname" }); // options { meta_name }
         this.conns.push(conn);
 
+        // On receiving messages
+        conn.on('data', async function (data) {
+            console.log('4 Received', data);
+            console.log(typeof (data));
+            await client_ref.writable?.write(data);
+        });
+
+        // When connection is estabilished
         conn.on('open', function () {
-            // Receive messages
-            conn.on('data', async function (data) {
-                console.log('Received', data);
-                console.log(typeof (data));
-                await client_ref.writable?.write(data);
-            });
 
             // Send messages
             conn.send('Hello!');

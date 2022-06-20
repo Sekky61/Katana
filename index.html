@@ -10,28 +10,28 @@
 </head>
 
 <body>
-    <h1>Bar</h1>
-    <p id="conns_dump"></p>
-
-    <label for="message">Send message</label>
-    <input type="text" id="message">
-    <button id="send_text">Send</button>
+    <h1>File sender</h1>
 
     <div class="body">
         <div class="left">
             <h1>Send</h1>
-            <p>Your ID: <span id="id_display"></span><button id="copy_id">Copy to clipboard</button></p>
+            <p>Your ID: <span id="id_display"></span><button id="copy_link">Copy link to clipboard</button></p>
+            <div id="qr_space"></div>
             <input type="text" id="name">
             <button id="name_btn">Change id</button>
             <hr>
-            <input type="file" id="file_in">
             <button id="send_file">Send</button>
             <div id="drop_cont">
-                Drop here
+                <label for="file_upload" class="custom-file-upload">
+                    <i class="fa fa-cloud-upload"></i> Click here to upload or drag and drop
+                </label>
+                <input type="file" id="file_upload">
             </div>
         </div>
         <div class="right">
             <h1>Receive</h1>
+            <p>Connection status: <span id="conn_status"></span></p>
+            <hr>
             <label for="connect">Connect</label>
             <input type="text" id="connect">
             <button id="b">Connect</button>
@@ -42,6 +42,7 @@
     </div>
 
     <script src="https://unpkg.com/peerjs@1.3.2/dist/peerjs.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/gh/davidshimjs/qrcodejs/qrcode.min.js"></script>
     <script type="module" src="script.js"></script>
 </body>
 

@@ -2,27 +2,40 @@ import Client from './client.js'
 
 const name_input = document.querySelector("#name");
 const name_btn = document.querySelector("#name_btn");
-const copy_id = document.querySelector("#copy_id");
+const copy_link = document.querySelector("#copy_link");
+const qr_space = document.querySelector("#qr_space");
+
+const conn_status = document.querySelector("#conn_status");
 
 const input = document.querySelector("#connect");
 const connect_btn = document.querySelector("#b");
 
-const message_field = document.querySelector("#message");
-const send_text_btn = document.querySelector("#send_text");
-
-const conns_dump = document.querySelector("#conns_dump");
-
-const file_in = document.querySelector("#file_in");
+const file_upload = document.querySelector("#file_upload");
 const send_file_btn = document.querySelector("#send_file");
 
 const id_display = document.querySelector("#id_display");
 const drop_cont = document.querySelector("#drop_cont");
 
-let cl = new Client()
+var cl = new Client()
+var qrcode;
 console.log("pog")
+check_url_params();
 update_id_display();
+update_conn_status();
 
 var writable;
+
+// Connect, if site is loaded with id param
+function check_url_params() {
+    let url = new URL(window.location);
+    let id_param = url.searchParams.get('id')
+    console.log("--")
+    console.log(id_param)
+
+    if (id_param !== null) {
+        cl.connect(id_param)
+    }
+}
 
 // dragover and dragenter events need to have 'preventDefault' called
 // in order for the 'drop' event to register. 
@@ -36,13 +49,13 @@ drop_cont.ondragover = drop_cont.ondragenter = function (evt) {
 drop_cont.ondrop = function (evt) {
     // pretty simple -- but not for IE :(
     console.dir(evt)
-    file_in.files = evt.dataTransfer.files;
+    file_upload.files = evt.dataTransfer.files;
 
     // If you want to use some of the dropped files
     // const dT = new DataTransfer();
     // dT.items.add(evt.dataTransfer.files[0]);
     // dT.items.add(evt.dataTransfer.files[3]);
-    // file_in.files = dT.files;
+    // file_upload.files = dT.files;
 
     evt.preventDefault();
 };
@@ -70,19 +83,14 @@ document.querySelector("#save-file").onclick = async () => {
     cl.writable = writable;
 }
 
-copy_id.addEventListener("click", () => {
+copy_link.addEventListener("click", () => {
     let id = cl.peer.id;
-    navigator.clipboard.writeText(id);
-});
-
-send_text_btn.addEventListener("click", () => {
-    let msg = message_field.value;
-    console.log("Sending " + msg)
-    cl.send_all(msg)
+    let link = get_link(id);
+    navigator.clipboard.writeText(link);
 });
 
 send_file_btn.addEventListener("click", () => {
-    let file = file_in.files[0];
+    let file = file_upload.files[0];
     console.dir(file)
 
     parseFile(file, (file_string) => {
@@ -99,10 +107,9 @@ name_btn.addEventListener("click", () => {
 connect_btn.addEventListener("click", () => {
     console.log("cl")
     let in_id = input.value;
-    let meta_name = name_input.value;
-    console.log(in_id)
 
     cl.connect(in_id)
+    update_conn_status()
 })
 
 function parseFile(file, callback) {
@@ -134,7 +141,34 @@ function parseFile(file, callback) {
     chunkReaderBlock(offset, chunkSize, file);
 }
 
+function update_conn_status() {
+    conn_status.innerText = cl.get_status()
+}
+
+function get_link(id) {
+    let url = new URL(window.location);
+    url.searchParams.set('id', id)
+    return url.toString()
+}
+
 function update_id_display() {
     let id = cl.peer.id;
+
+    let link = get_link(id);
+
     id_display.innerText = id;
+
+    if (qrcode !== undefined) {
+        qrcode.clear(); // clear the code.
+        qrcode.makeCode(url);
+    } else {
+        qrcode = new QRCode(qr_space, {
+            text: link,
+            width: 128,
+            height: 128,
+            colorDark: '#000',
+            colorLight: '#fff',
+            correctLevel: QRCode.CorrectLevel.H
+        });
+    }
 }
