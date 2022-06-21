@@ -4,34 +4,50 @@ export default class Client {
             // No parameter passed, generate id
             id = Client.id_gen()
         }
-        this.peer = new Peer(id);
+        this.id = id;
+        this.peer = null;
         this.conns = [];
         this.files = [];
 
-        this.peer.on('open', function (id) {
-            console.log('My peer ID is: ' + id);
-        });
-
-        // Passive connection opened
-        this.peer.on('connection', (conn) => {
-            console.log('3 Received new connection:');
-            console.dir(conn);
-
-            this.conns.push(conn);
-            conn.on('data', function (data) {
-                console.log('2 Received', data);
-            });
-
-            conn.on("open", () => {
-                // Send file offer
-                let offer = this.get_file_offer();
-                conn.send(offer)
-            });
-        });
-
-        this.peer.on('error', function (err) { console.log("Error"); console.dir(err) });
-
         console.log("Client initiated");
+    }
+
+    async init_peer() {
+        return new Promise((resolve, reject) => {
+            this.peer = new Peer(this.id);
+
+            // Connection to brokering server estabilished
+            this.peer.on('open', function (id) {
+                console.log('My peer ID is: ' + id);
+                resolve()
+            });
+
+            // Passive connection opened
+            this.peer.on('connection', (conn) => {
+                console.log('3 Received new connection:');
+                console.dir(conn);
+
+                this.conns.push(conn);
+                conn.on('data', function (data) {
+                    console.log('2 Received', data);
+                });
+
+                conn.on("open", () => {
+                    // Send file offer
+                    let offer = this.get_file_offer();
+                    conn.send(offer)
+                });
+            });
+
+            this.peer.on('error', function (err) {
+                console.log("Error");
+                console.dir(err);
+                reject();
+            });
+
+            console.log("Peer initiated");
+        });
+
     }
 
     add_file(file_meta) {
@@ -55,7 +71,7 @@ export default class Client {
             return "No connection";
         } else {
             let con_ids = this.conns.map((conn) => {
-                return conn.provider._id;
+                return conn.peer;
             });
             return `${this.conns.length} connection(s): ${con_ids}`;
         }
@@ -65,7 +81,7 @@ export default class Client {
     // todo callback for connection
     connect(id) {
         let client_ref = this;
-        let conn = this.peer.connect(id, { reliable: true, meta_name: "Metaname" }); // options { meta_name }
+        let conn = this.peer.connect(id, { reliable: true, meta_name: "Metaname" });
         this.conns.push(conn);
 
         // On receiving messages

@@ -8,7 +8,7 @@ const qr_space = document.querySelector("#qr_space");
 const conn_status = document.querySelector("#conn_status");
 
 const input = document.querySelector("#connect");
-const connect_btn = document.querySelector("#b");
+const connect_btn = document.querySelector("#connect_button");
 
 const file_upload = document.querySelector("#file_upload");
 const send_file_btn = document.querySelector("#send_file");
@@ -17,8 +17,9 @@ const id_display = document.querySelector("#id_display");
 const drop_cont = document.querySelector("#drop_cont");
 
 var cl = new Client()
+await cl.init_peer();
 var qrcode;
-console.log("pog")
+
 check_url_params();
 update_id_display();
 update_conn_status();
@@ -29,11 +30,14 @@ var writable;
 function check_url_params() {
     let url = new URL(window.location);
     let id_param = url.searchParams.get('id')
-    console.log("--")
+    console.log("read and connecting to --")
     console.log(id_param)
 
     if (id_param !== null) {
+        console.log("Actually connecting")
         cl.connect(id_param)
+        update_conn_status()
+
     }
 }
 
@@ -64,7 +68,9 @@ document.querySelector("#close").onclick = async () => {
     await cl.writable.close()
 }
 
-document.querySelector("#save-file").onclick = async () => {
+// Opens file for writing
+// Creates writeable attribute on client
+document.querySelector("#save_file").onclick = async () => {
     const options = {
         types: [
             {
@@ -98,9 +104,10 @@ send_file_btn.addEventListener("click", () => {
     })
 });
 
-name_btn.addEventListener("click", () => {
+name_btn.addEventListener("click", async () => {
     let connect_name = name_input.value;
     cl = new Client(connect_name)
+    await cl.init_peer();
     update_id_display();
 });
 
@@ -152,7 +159,7 @@ function get_link(id) {
 }
 
 function update_id_display() {
-    let id = cl.peer.id;
+    let id = cl.peer && cl.peer.id;
 
     let link = get_link(id);
 
@@ -160,7 +167,7 @@ function update_id_display() {
 
     if (qrcode !== undefined) {
         qrcode.clear(); // clear the code.
-        qrcode.makeCode(url);
+        qrcode.makeCode(link);
     } else {
         qrcode = new QRCode(qr_space, {
             text: link,
