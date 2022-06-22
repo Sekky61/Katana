@@ -15,6 +15,7 @@ const send_file_btn = document.querySelector("#send_file");
 
 const id_display = document.querySelector("#id_display");
 const drop_cont = document.querySelector("#drop_cont");
+const file_list = document.querySelector("#file_list");
 
 var cl = new Client()
 await cl.init_peer();
@@ -51,17 +52,43 @@ drop_cont.ondragover = drop_cont.ondragenter = function (evt) {
 };
 
 drop_cont.ondrop = function (evt) {
-    // pretty simple -- but not for IE :(
-    console.dir(evt)
-    file_upload.files = evt.dataTransfer.files;
+    console.log("File dropped")
+    console.dir(file_upload)
+    let updated_file_list = new DataTransfer();
+    // Append dropped files to input field
+    for (const file of file_upload.files) {
+        updated_file_list.items.add(file)
+    }
+    for (const file of evt.dataTransfer.files) {
+        updated_file_list.items.add(file)
+    }
 
-    // If you want to use some of the dropped files
-    // const dT = new DataTransfer();
-    // dT.items.add(evt.dataTransfer.files[0]);
-    // dT.items.add(evt.dataTransfer.files[3]);
-    // file_upload.files = dT.files;
+    file_upload.files = updated_file_list.files;
 
     evt.preventDefault();
+    update_file_list()
+};
+
+function update_file_list() {
+    let ul = document.createElement("ul");
+    for (const file of file_upload.files) {
+        let li = document.createElement("li");
+        li.innerText = file.name;
+        ul.appendChild(li);
+    }
+    if (file_list.children.length == 0) {
+        file_list.appendChild(ul)
+    } else {
+        file_list.childNodes[0].replaceWith(ul)
+    }
+}
+
+file_upload.onchange = function (e) {
+    console.log("File picked")
+
+    console.dir(e)
+    console.dir(file_upload)
+    update_file_list()
 };
 
 document.querySelector("#close").onclick = async () => {

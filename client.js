@@ -34,6 +34,7 @@ export default class Client {
 
                 conn.on("open", () => {
                     // Send file offer
+                    console.log("Send file offer")
                     let offer = this.get_file_offer();
                     conn.send(offer)
                 });
