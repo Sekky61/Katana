@@ -35,8 +35,7 @@ export default class Client {
                 conn.on("open", () => {
                     // Send file offer
                     console.log("Send file offer")
-                    let offer = this.get_file_offer();
-                    conn.send(offer)
+                    this.send_file_offer()
                 });
             });
 
@@ -56,7 +55,16 @@ export default class Client {
     }
 
     get_file_offer() {
-        return { msg: "file_offer", files: this.files }
+        let files_meta = [];
+        for (const file of this.files) {
+            files_meta.push({ name: file.name, size: file.size })
+        }
+        return { msg: "file_offer", files: files_meta }
+    }
+
+    send_file_offer() {
+        let offer = this.get_file_offer();
+        this.send_all(offer);
     }
 
     static id_gen() {

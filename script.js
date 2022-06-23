@@ -46,10 +46,24 @@ function check_url_params() {
 // in order for the 'drop' event to register. 
 // See: https://developer.mozilla.org/en-US/docs/Web/Guide/HTML/Drag_operations#droptargets
 drop_cont.ondragover = drop_cont.ondragenter = function (evt) {
-    console.log("Prevented")
-    console.log(evt)
     evt.preventDefault();
 };
+
+// Updates both Client and UI
+function update_file_list() {
+    cl.files = file_upload.files;
+    let ul = document.createElement("ul");
+    for (const file of file_upload.files) {
+        let li = document.createElement("li");
+        li.innerText = file.name;
+        ul.appendChild(li);
+    }
+    if (file_list.children.length == 0) {
+        file_list.appendChild(ul)
+    } else {
+        file_list.childNodes[0].replaceWith(ul)
+    }
+}
 
 drop_cont.ondrop = function (evt) {
     console.log("File dropped")
@@ -67,21 +81,8 @@ drop_cont.ondrop = function (evt) {
 
     evt.preventDefault();
     update_file_list()
+    cl.send_file_offer()
 };
-
-function update_file_list() {
-    let ul = document.createElement("ul");
-    for (const file of file_upload.files) {
-        let li = document.createElement("li");
-        li.innerText = file.name;
-        ul.appendChild(li);
-    }
-    if (file_list.children.length == 0) {
-        file_list.appendChild(ul)
-    } else {
-        file_list.childNodes[0].replaceWith(ul)
-    }
-}
 
 file_upload.onchange = function (e) {
     console.log("File picked")
@@ -89,6 +90,7 @@ file_upload.onchange = function (e) {
     console.dir(e)
     console.dir(file_upload)
     update_file_list()
+    cl.send_file_offer()
 };
 
 document.querySelector("#close").onclick = async () => {
