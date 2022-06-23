@@ -5,6 +5,7 @@
     <meta charset="UTF-8">
     <meta http-equiv="X-UA-Compatible" content="IE=edge">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <script src="https://kit.fontawesome.com/0c7edecc93.js" crossorigin="anonymous"></script>
     <link rel="stylesheet" href="style.css">
     <title>Document</title>
 </head>
@@ -15,17 +16,28 @@
     <div class="body">
         <div class="left">
             <h1>Send</h1>
-            <p>Your ID: <span id="id_display"></span><button id="copy_link">Copy link to clipboard</button></p>
-            <div id="qr_space"></div>
-            <input type="text" id="name">
-            <button id="name_btn">Change id</button>
-            <hr>
+            <div class="share">
+                <div class="share_bubble">
+                    <span>Your ID: <span id="id_display"></span></span>
+                    <button id="copy_link">Copy link to clipboard <i class="fa-solid fa-clipboard"></i></button>
+                </div>
+                <div class="share_bubble">
+                    <span>Or scan this</span>
+                    <div id="qr_space">
+                        <!-- 128x128 qr -->
+                    </div>
+                </div>
+                <!--<input type="text" id="name">
+                 <button id="name_btn">Change id</button> -->
+            </div>
             <button id="send_file">Send</button>
             <div id="drop_cont">
-                <label for="file_upload" class="custom-file-upload">
-                    <i class="fa fa-cloud-upload"></i> Click here to upload or drag and drop
-                </label>
-                <input type="file" id="file_upload" multiple>
+                <div class="empty_upload">
+                    <label for="file_upload" class="custom-file-upload">
+                        <i class="fa fa-cloud-upload"></i> Click here to upload or drag and drop
+                    </label>
+                    <input type="file" id="file_upload" multiple>
+                </div>
                 <div id="file_list"></div>
             </div>
         </div>

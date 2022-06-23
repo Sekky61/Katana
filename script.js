@@ -40,6 +40,18 @@ async function construct_client(id) {
 
     client.register_offered_files_changed_callback((client) => {
         console.log(`Client callback 2 ${client.offered_files}`)
+
+        let ul = document.createElement("ul");
+        for (const file of client.offered_files) {
+            let li = document.createElement("li");
+            li.innerText = file.name;
+            ul.appendChild(li);
+        }
+        if (offered_file_list.children.length == 0) {
+            offered_file_list.appendChild(ul)
+        } else {
+            offered_file_list.childNodes[0].replaceWith(ul)
+        }
     });
 
     return client;
