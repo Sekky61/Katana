@@ -8,6 +8,11 @@ export default class Client {
         this.peer = null;
         this.conns = [];
         this.files = [];
+        this.offered_files = ["bar", "baz"];
+
+        this.files_changed_callback = null;
+        this.offered_files_changed_callback = null;
+
 
         console.log("Client initiated");
     }
@@ -26,10 +31,12 @@ export default class Client {
             this.peer.on('connection', (conn) => {
                 console.log('3 Received new connection:');
                 console.dir(conn);
+                let client_ref = this;
 
                 this.conns.push(conn);
                 conn.on('data', function (data) {
                     console.log('2 Received', data);
+                    client_ref.handle_message(data);
                 });
 
                 conn.on("open", () => {
@@ -47,11 +54,22 @@ export default class Client {
 
             console.log("Peer initiated");
         });
+    }
 
+    register_files_changed_callback(callback) {
+        this.files_changed_callback = callback;
+    }
+
+    register_offered_files_changed_callback(callback) {
+        this.offered_files_changed_callback = callback;
     }
 
     add_file(file_meta) {
         this.files.push(file_meta)
+        console.log(`Files now ${this.files}`)
+        if (this.files_changed_callback) {
+            this.files_changed_callback(this);
+        }
     }
 
     get_file_offer() {
@@ -59,7 +77,7 @@ export default class Client {
         for (const file of this.files) {
             files_meta.push({ name: file.name, size: file.size })
         }
-        return { msg: "file_offer", files: files_meta }
+        return { msg_type: "file_offer", files: files_meta }
     }
 
     send_file_offer() {
@@ -97,6 +115,7 @@ export default class Client {
         conn.on('data', async function (data) {
             console.log('4 Received', data);
             console.log(typeof (data));
+            client_ref.handle_message(data);
             await client_ref.writable?.write(data);
         });
 
@@ -115,6 +134,32 @@ export default class Client {
 
             con.send(msg)
             console.log("tick")
+        }
+    }
+
+    handle_message(msg) {
+        if (!msg) {
+            console.error("No message to handle");
+            return;
+        }
+        if (typeof msg !== 'object') {
+            console.log(`Non-object message: ${msg}`);
+            return;
+        }
+
+        if ("msg_type" in msg) {
+            let msg_type = msg.msg_type;
+            if (msg_type === "file_offer") {
+                // New file offer
+                console.log("Handle file offer");
+                if (!msg.files) {
+                    console.error("File offer has no field 'files'");
+                }
+                this.offered_files = msg.files;
+                this.offered_files_changed_callback(this);
+
+                //offered_file_list
+            }
         }
     }
 }

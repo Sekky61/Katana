@@ -16,9 +16,37 @@ const send_file_btn = document.querySelector("#send_file");
 const id_display = document.querySelector("#id_display");
 const drop_cont = document.querySelector("#drop_cont");
 const file_list = document.querySelector("#file_list");
+const offered_file_list = document.querySelector("#offered_file_list");
 
-var cl = new Client()
-await cl.init_peer();
+async function construct_client(id) {
+    let client = new Client(id);
+    await client.init_peer();
+
+    client.register_files_changed_callback((client) => {
+        console.log(`Client callback 1 ${client.files}`)
+
+        let ul = document.createElement("ul");
+        for (const file of client.files) {
+            let li = document.createElement("li");
+            li.innerText = file.name;
+            ul.appendChild(li);
+        }
+        if (file_list.children.length == 0) {
+            file_list.appendChild(ul)
+        } else {
+            file_list.childNodes[0].replaceWith(ul)
+        }
+    });
+
+    client.register_offered_files_changed_callback((client) => {
+        console.log(`Client callback 2 ${client.offered_files}`)
+    });
+
+    return client;
+}
+
+var cl = await construct_client();
+console.dir(cl)
 var qrcode;
 
 check_url_params();
@@ -49,38 +77,15 @@ drop_cont.ondragover = drop_cont.ondragenter = function (evt) {
     evt.preventDefault();
 };
 
-// Updates both Client and UI
-function update_file_list() {
-    cl.files = file_upload.files;
-    let ul = document.createElement("ul");
-    for (const file of file_upload.files) {
-        let li = document.createElement("li");
-        li.innerText = file.name;
-        ul.appendChild(li);
-    }
-    if (file_list.children.length == 0) {
-        file_list.appendChild(ul)
-    } else {
-        file_list.childNodes[0].replaceWith(ul)
-    }
-}
-
 drop_cont.ondrop = function (evt) {
     console.log("File dropped")
-    console.dir(file_upload)
-    let updated_file_list = new DataTransfer();
-    // Append dropped files to input field
-    for (const file of file_upload.files) {
-        updated_file_list.items.add(file)
-    }
-    for (const file of evt.dataTransfer.files) {
-        updated_file_list.items.add(file)
-    }
 
-    file_upload.files = updated_file_list.files;
+    // Append dropped files to input field
+    for (const file of evt.dataTransfer.files) {
+        cl.add_file(file)
+    }
 
     evt.preventDefault();
-    update_file_list()
     cl.send_file_offer()
 };
 
@@ -89,7 +94,10 @@ file_upload.onchange = function (e) {
 
     console.dir(e)
     console.dir(file_upload)
-    update_file_list()
+
+    for (const file of file_upload.files) {
+        cl.add_file(file)
+    }
     cl.send_file_offer()
 };
 
@@ -134,9 +142,8 @@ send_file_btn.addEventListener("click", () => {
 });
 
 name_btn.addEventListener("click", async () => {
-    let connect_name = name_input.value;
-    cl = new Client(connect_name)
-    await cl.init_peer();
+    let connect_id = name_input.value;
+    cl = await construct_client(connect_id);
     update_id_display();
 });
 
