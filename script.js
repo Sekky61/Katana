@@ -1,7 +1,6 @@
 import Client from './client.js'
 
 const name_input = document.querySelector("#name");
-const name_btn = document.querySelector("#name_btn");
 const copy_link = document.querySelector("#copy_link");
 const qr_space = document.querySelector("#qr_space");
 
@@ -44,6 +43,12 @@ async function construct_client(id) {
         let ul = document.createElement("ul");
         for (const file of client.offered_files) {
             let li = document.createElement("li");
+            li.setAttribute("file_name", file.name)
+            li.onclick = (e) => {
+                let file_name = li.getAttribute("file_name");
+                console.log(`File ${file_name} clicked.`);
+                cl.request_download(file_name);
+            }
             li.innerText = file.name;
             ul.appendChild(li);
         }
@@ -145,18 +150,13 @@ copy_link.addEventListener("click", () => {
 });
 
 send_file_btn.addEventListener("click", () => {
-    let file = file_upload.files[0];
-    console.dir(file)
+    console.error("Depr")
+    // let file = file_upload.files[0];
+    // console.dir(file)
 
-    parseFile(file, (file_string) => {
-        cl.send_all(file_string)
-    })
-});
-
-name_btn.addEventListener("click", async () => {
-    let connect_id = name_input.value;
-    cl = await construct_client(connect_id);
-    update_id_display();
+    // parseFile(file, (file_string) => {
+    //     cl.send_all(file_string)
+    // })
 });
 
 connect_btn.addEventListener("click", () => {
@@ -166,35 +166,6 @@ connect_btn.addEventListener("click", () => {
     cl.connect(in_id)
     update_conn_status()
 })
-
-function parseFile(file, callback) {
-    var fileSize = file.size;
-    var chunkSize = 1 * 64; // bytes
-    var offset = 0;
-    var chunkReaderBlock = null;
-
-    chunkReaderBlock = function (_offset, length, _file) {
-        var blob = _file.slice(_offset, length + _offset);
-        console.log("blob")
-        console.dir(blob)
-
-        blob.arrayBuffer()
-            .then((array) => {
-                console.log("Loaded");
-                console.dir(array);
-                callback(array)
-                offset += array.byteLength;
-                if (offset >= fileSize) {
-                    return;
-                }
-                chunkReaderBlock(offset, chunkSize, file);
-            })
-            .catch((e) => console.log(e))
-    }
-
-    // now let's start the read with the first block
-    chunkReaderBlock(offset, chunkSize, file);
-}
 
 function update_conn_status() {
     conn_status.innerText = cl.get_status()

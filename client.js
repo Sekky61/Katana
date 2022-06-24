@@ -8,7 +8,7 @@ export default class Client {
         this.peer = null;
         this.conns = [];
         this.files = [];
-        this.offered_files = ["bar", "baz"];
+        this.offered_files = [];
 
         this.files_changed_callback = null;
         this.offered_files_changed_callback = null;
@@ -137,6 +137,16 @@ export default class Client {
         }
     }
 
+    request_download(file_name) {
+        this.offered_files.forEach((file) => {
+            if (file_name === file.name) {
+                console.log("Request file download")
+                let request = { msg_type: "file_request", file_name: file.name }
+                this.send_all(request)
+            }
+        })
+    }
+
     handle_message(msg) {
         if (!msg) {
             console.error("No message to handle");
@@ -157,9 +167,53 @@ export default class Client {
                 }
                 this.offered_files = msg.files;
                 this.offered_files_changed_callback(this);
+            } else if (msg_type === "file_request") {
+                console.log("Handle file request");
+                if (!msg.file_name) {
+                    console.error("File offer has no field 'file_name'");
+                }
 
-                //offered_file_list
+                // Lookup file and send it
+                this.files.forEach((file) => {
+                    if (msg.file_name === file.name) {
+                        console.log("Sending file")
+                        parseFile(file, (file_string) => {
+                            this.send_all(file_string)
+                        })
+                    }
+                });
+            } else {
+                console.error(`Unrecognised msg type: ${msg_type}`);
             }
         }
     }
+}
+
+function parseFile(file, callback) {
+    var fileSize = file.size;
+    var chunkSize = 1 * 64; // bytes
+    var offset = 0;
+    var chunkReaderBlock = null;
+
+    chunkReaderBlock = function (_offset, length, _file) {
+        var blob = _file.slice(_offset, length + _offset);
+        console.log("blob")
+        console.dir(blob)
+
+        blob.arrayBuffer()
+            .then((array) => {
+                console.log("Loaded");
+                console.dir(array);
+                callback(array)
+                offset += array.byteLength;
+                if (offset >= fileSize) {
+                    return;
+                }
+                chunkReaderBlock(offset, chunkSize, file);
+            })
+            .catch((e) => console.log(e))
+    }
+
+    // now let's start the read with the first block
+    chunkReaderBlock(offset, chunkSize, file);
 }
