@@ -1,13 +1,9 @@
 import Client from './client.js'
 
-const name_input = document.querySelector("#name");
 const copy_link = document.querySelector("#copy_link");
 const qr_space = document.querySelector("#qr_space");
 
 const conn_status = document.querySelector("#conn_status");
-
-const input = document.querySelector("#connect");
-const connect_btn = document.querySelector("#connect_button");
 
 const file_upload = document.querySelector("#file_upload");
 const send_file_btn = document.querySelector("#send_file");
@@ -118,31 +114,6 @@ file_upload.onchange = function (e) {
     cl.send_file_offer()
 };
 
-document.querySelector("#close").onclick = async () => {
-    await cl.writable.close()
-}
-
-// Opens file for writing
-// Creates writeable attribute on client
-document.querySelector("#save_file").onclick = async () => {
-    const options = {
-        types: [
-            {
-                description: "Test files",
-                accept: {
-                    "text/plain": [".txt"],
-                },
-            },
-        ],
-    };
-
-    const handle = await window.showSaveFilePicker(options);
-    console.dir(handle)
-    writable = await handle.createWritable();
-    console.dir(writable)
-    cl.writable = writable;
-}
-
 copy_link.addEventListener("click", () => {
     let id = cl.peer.id;
     let link = get_link(id);
@@ -158,14 +129,6 @@ send_file_btn.addEventListener("click", () => {
     //     cl.send_all(file_string)
     // })
 });
-
-connect_btn.addEventListener("click", () => {
-    console.log("cl")
-    let in_id = input.value;
-
-    cl.connect(in_id)
-    update_conn_status()
-})
 
 function update_conn_status() {
     conn_status.innerText = cl.get_status()

@@ -9,6 +9,7 @@ export default class Client {
         this.conns = [];
         this.files = [];
         this.offered_files = [];
+        this.writable = null;
 
         this.files_changed_callback = null;
         this.offered_files_changed_callback = null;
@@ -116,7 +117,6 @@ export default class Client {
             console.log('4 Received', data);
             console.log(typeof (data));
             client_ref.handle_message(data);
-            await client_ref.writable?.write(data);
         });
 
         // When connection is estabilished
@@ -138,13 +138,38 @@ export default class Client {
     }
 
     request_download(file_name) {
-        this.offered_files.forEach((file) => {
+        this.offered_files.forEach(async (file) => {
             if (file_name === file.name) {
-                console.log("Request file download")
+                console.log("Create place to save");
+
+                let x = await this.create_writeable(file_name)
+
+                console.log("Request file download");
                 let request = { msg_type: "file_request", file_name: file.name }
                 this.send_all(request)
             }
         })
+    }
+
+    // First argument: optional name suggestion (string)
+    async create_writeable(name_suggest) {
+        const options = {
+            types: [
+                {
+                    description: "Test files",
+                    suggestedName: name_suggest,
+                    accept: {
+                        "text/plain": [".txt"],
+                    },
+                },
+            ],
+        };
+
+        const handle = await window.showSaveFilePicker(options);
+        console.dir(handle)
+        let writable = await handle.createWritable();
+        console.dir(writable)
+        this.writable = writable;
     }
 
     handle_message(msg) {
@@ -177,11 +202,21 @@ export default class Client {
                 this.files.forEach((file) => {
                     if (msg.file_name === file.name) {
                         console.log("Sending file")
-                        parseFile(file, (file_string) => {
-                            this.send_all(file_string)
+                        parseFile(file, (file_string, last_data) => {
+                            this.send_all({ msg_type: "file_data", data: file_string, last_data: last_data })
                         })
                     }
                 });
+            } else if (msg_type == "file_data") {
+                if (this.writable) {
+                    this.writable?.write(msg.data);
+                } else {
+                    console.error("Writeable not open");
+                }
+
+                if (msg.last_data) {
+                    this.writable.close() // async
+                }
             } else {
                 console.error(`Unrecognised msg type: ${msg_type}`);
             }
@@ -204,10 +239,12 @@ function parseFile(file, callback) {
             .then((array) => {
                 console.log("Loaded");
                 console.dir(array);
-                callback(array)
                 offset += array.byteLength;
                 if (offset >= fileSize) {
+                    callback(array, true) // last chunk
                     return;
+                } else {
+                    callback(array, false) // not last chunk
                 }
                 chunkReaderBlock(offset, chunkSize, file);
             })
