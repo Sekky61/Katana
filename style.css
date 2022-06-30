@@ -55,12 +55,31 @@ body {
     align-items: center;
 }
 
+/* Upload menu */
+
 #drop_cont label {
     background-color: rgb(14, 198, 211);
 }
 
 input[type="file"] {
     display: none;
+}
+
+#file_list>ul {
+    padding-inline-start: 0;
+    margin-block-start: 0;
+    margin-block-end: 0;
+    padding: 10px;
+}
+
+.file_list_item {
+    display: block;
+    background-color: aliceblue;
+    border-radius: 3px;
+    padding: 5px;
+    padding-left: 15px;
+    display: flex;
+    justify-content: space-between;
 }
 
 .custom-file-upload {

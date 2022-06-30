@@ -67,7 +67,6 @@ export default class Client {
 
     add_file(file_meta) {
         this.files.push(file_meta)
-        console.log(`Files now ${this.files}`)
         if (this.files_changed_callback) {
             this.files_changed_callback(this);
         }

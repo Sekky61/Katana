@@ -6,12 +6,45 @@ const qr_space = document.querySelector("#qr_space");
 const conn_status = document.querySelector("#conn_status");
 
 const file_upload = document.querySelector("#file_upload");
-const send_file_btn = document.querySelector("#send_file");
 
 const id_display = document.querySelector("#id_display");
 const drop_cont = document.querySelector("#drop_cont");
 const file_list = document.querySelector("#file_list");
 const offered_file_list = document.querySelector("#offered_file_list");
+
+function generate_file_element() {
+
+    let li = document.createElement("li");
+    li.className = "file_list_item";
+
+    let span = document.createElement("span");
+    li.appendChild(span);
+
+    let button = document.createElement("button");
+    li.appendChild(button);
+
+    let i = document.createElement("i");
+    i.className = "fa-solid fa-xmark";
+    button.appendChild(i);
+
+    return li;
+};
+
+let file_upload_element = generate_file_element();
+
+// Setup file_upload button listener
+
+file_list.addEventListener('click', (event) => {
+    console.log(event.target.nodeName);
+    const isButton = event.target.nodeName === 'BUTTON';
+    console.dir(event);
+    if (!isButton) {
+        console.log("click not button")
+        return;
+    }
+    console.log("click button")
+
+})
 
 async function construct_client(id) {
     let client = new Client(id);
@@ -20,11 +53,19 @@ async function construct_client(id) {
     client.register_files_changed_callback((client) => {
         console.log(`Client callback 1 ${client.files}`)
 
+        if (client.files.length == 0) {
+            // Appear big drop prompt
+            file_upload.style.display = "block";
+        } else {
+            file_upload.style.display = "none";
+            document.querySelector(".empty_upload").style.display = "none";
+        }
+
         let ul = document.createElement("ul");
         for (const file of client.files) {
-            let li = document.createElement("li");
-            li.innerText = file.name;
-            ul.appendChild(li);
+            let block = file_upload_element.cloneNode(true); //deep
+            block.firstElementChild.innerText = file.name;
+            ul.appendChild(block);
         }
         if (file_list.children.length == 0) {
             file_list.appendChild(ul)
@@ -118,16 +159,6 @@ copy_link.addEventListener("click", () => {
     let id = cl.peer.id;
     let link = get_link(id);
     navigator.clipboard.writeText(link);
-});
-
-send_file_btn.addEventListener("click", () => {
-    console.error("Depr")
-    // let file = file_upload.files[0];
-    // console.dir(file)
-
-    // parseFile(file, (file_string) => {
-    //     cl.send_all(file_string)
-    // })
 });
 
 function update_conn_status() {
