@@ -6,12 +6,16 @@ const qr_space = document.querySelector("#qr_space");
 const conn_status = document.querySelector("#conn_status");
 
 const file_upload = document.querySelector("#file_upload");
+const empty_upload_div = document.querySelector(".empty_upload");
 
 const id_display = document.querySelector("#id_display");
 const drop_cont = document.querySelector("#drop_cont");
 const file_list = document.querySelector("#file_list");
 const offered_file_list = document.querySelector("#offered_file_list");
 
+const FILE_DELETE_ATTRIBUTE = "data-delete_file";
+
+// Template for new file list items. Fill in details and append to DOM
 function generate_file_element() {
 
     let li = document.createElement("li");
@@ -33,7 +37,7 @@ function generate_file_element() {
 let file_upload_element = generate_file_element();
 
 // Setup file_upload button listener
-
+// Single listener for all files on sending side
 file_list.addEventListener('click', (event) => {
     console.log(event.target.nodeName);
     const isButton = event.target.nodeName === 'BUTTON';
@@ -43,6 +47,16 @@ file_list.addEventListener('click', (event) => {
         return;
     }
     console.log("click button")
+    // The target of a click was a button
+
+    console.dir(event.target)
+    let delete_taget = event.target.getAttribute(FILE_DELETE_ATTRIBUTE);
+    if (!delete_taget) {
+        console.error(`Unknown deletion target: "${delete_taget}"`);
+    }
+
+    console.log(`Delete ${delete_taget}`)
+    cl.delete_file(delete_taget);
 
 })
 
@@ -52,19 +66,22 @@ async function construct_client(id) {
 
     client.register_files_changed_callback((client) => {
         console.log(`Client callback 1 ${client.files}`)
-
-        if (client.files.length == 0) {
+        let number_of_files = Object.keys(client.files).length;
+        console.log(`${number_of_files} files`);
+        if (number_of_files === 0) {
             // Appear big drop prompt
-            file_upload.style.display = "block";
+            empty_upload_div.style = null; // alternatively, .removeAttribute("style");
         } else {
-            file_upload.style.display = "none";
-            document.querySelector(".empty_upload").style.display = "none";
+            empty_upload_div.style.display = "none";
         }
 
         let ul = document.createElement("ul");
-        for (const file of client.files) {
-            let block = file_upload_element.cloneNode(true); //deep
-            block.firstElementChild.innerText = file.name;
+        for (const file_name in client.files) {
+            let block = file_upload_element.cloneNode(true); // deep copy
+            // Fill in details
+            block.firstElementChild.innerText = file_name;
+            block.setAttribute("id", `${file_name}_listitem`);
+            block.children[1].setAttribute(FILE_DELETE_ATTRIBUTE, `${file_name}`);
             ul.appendChild(block);
         }
         if (file_list.children.length == 0) {

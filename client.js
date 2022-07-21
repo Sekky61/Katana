@@ -7,8 +7,10 @@ export default class Client {
         this.id = id;
         this.peer = null;
         this.conns = [];
-        this.files = [];
-        this.offered_files = [];
+
+        // key: file name, value: file object
+        this.files = {};
+        this.offered_files = []; // todo object (?)
         this.writable = null;
 
         this.files_changed_callback = null;
@@ -66,7 +68,19 @@ export default class Client {
     }
 
     add_file(file_meta) {
-        this.files.push(file_meta)
+        console.dir(file_meta)
+        if (!('name' in file_meta)) {
+            console.error(`Adding wrong object into file list`);
+            return;
+        }
+        this.files[file_meta.name] = file_meta;
+        if (this.files_changed_callback) {
+            this.files_changed_callback(this);
+        }
+    }
+
+    delete_file(filename) {
+        delete this.files[filename];
         if (this.files_changed_callback) {
             this.files_changed_callback(this);
         }
@@ -74,7 +88,7 @@ export default class Client {
 
     get_file_offer() {
         let files_meta = [];
-        for (const file of this.files) {
+        for (const file in this.files) {
             files_meta.push({ name: file.name, size: file.size })
         }
         return { msg_type: "file_offer", files: files_meta }
