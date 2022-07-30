@@ -15,16 +15,24 @@ const offered_file_list = document.querySelector("#offered_file_list");
 
 const FILE_DELETE_ATTRIBUTE = "data-delete_file";
 
-// Template for new file list items. Fill in details and append to DOM
-function generate_file_element() {
+// Template for new file list items.
+// param file_meta: a File object
+function generate_file_element(file_meta) {
 
     let li = document.createElement("li");
+    li.setAttribute("id", `${file_meta.name}_listitem`);
     li.className = "file_list_item";
 
-    let span = document.createElement("span");
-    li.appendChild(span);
+    let file_name = document.createElement("span");
+    file_name.innerText = file_meta.name;
+    li.appendChild(file_name);
+
+    let file_size = document.createElement("span");
+    file_size.innerText = file_meta.size;
+    li.appendChild(file_size);
 
     let button = document.createElement("button");
+    button.setAttribute(FILE_DELETE_ATTRIBUTE, `${file_meta.name}`);
     li.appendChild(button);
 
     let i = document.createElement("i");
@@ -33,8 +41,6 @@ function generate_file_element() {
 
     return li;
 };
-
-let file_upload_element = generate_file_element();
 
 // Setup file_upload button listener
 // Single listener for all files on sending side
@@ -76,12 +82,8 @@ async function construct_client(id) {
         }
 
         let ul = document.createElement("ul");
-        for (const file_name in client.files) {
-            let block = file_upload_element.cloneNode(true); // deep copy
-            // Fill in details
-            block.firstElementChild.innerText = file_name;
-            block.setAttribute("id", `${file_name}_listitem`);
-            block.children[1].setAttribute(FILE_DELETE_ATTRIBUTE, `${file_name}`);
+        for (const [file_name, file] of Object.entries(client.files)) {
+            let block = generate_file_element(file);
             ul.appendChild(block);
         }
         if (file_list.children.length == 0) {

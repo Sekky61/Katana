@@ -88,7 +88,7 @@ export default class Client {
 
     get_file_offer() {
         let files_meta = [];
-        for (const file in this.files) {
+        for (const [file_name, file] of Object.entries(this.files)) {
             files_meta.push({ name: file.name, size: file.size })
         }
         return { msg_type: "file_offer", files: files_meta }
