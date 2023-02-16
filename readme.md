@@ -1,5 +1,5 @@
 # Katana
 
-P2P file transfer
+P2P file transfer using [peerjs](https://peerjs.com/) library.
 
-Tested on current Google Chrome version
+Not in fully working state. Tested on current Google Chrome version
