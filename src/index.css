@@ -1,3 +1,7 @@
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
+
+.animation-duration-2000 {
+    animation-duration: 2000ms;
+}

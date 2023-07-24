@@ -13,7 +13,7 @@
     "autoprefixer": "^10.4.14",
     "peerjs": "^1.4.7",
     "postcss": "^8.4.23",
-    "qrcodejs": "^1.0.0",
+    "qrcode": "^1.5.3",
     "react": "^18.2.0",
     "react-dom": "^18.2.0",
     "react-scripts": "5.0.1",
@@ -44,5 +44,8 @@
       "last 1 firefox version",
       "last 1 safari version"
     ]
+  },
+  "devDependencies": {
+    "@types/qrcode": "^1.5.1"
   }
 }
