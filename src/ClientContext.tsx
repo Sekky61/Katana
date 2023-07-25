@@ -1,24 +1,96 @@
-import { createContext, useReducer, useContext } from 'react';
-import { create_initial_client, reducer } from './ClientReducer';
+import { createContext, useReducer, useContext, useState, useEffect, useRef } from 'react';
+import Peer, { DataConnection } from 'peerjs';
 
-export const ClientContext = createContext([] as any[]);
+export interface IClient {
+  // The peer object
+  peer: Peer | null;
+  peerId: string | null;
+  isConnected: boolean;
+  messages: string[];
+  // Connect to another peer
+  connectTo: (id: string) => void;
+}
+
+const defaultClient: IClient = {
+  peer: null,
+  isConnected: false,
+  messages: [],
+  connectTo: () => { },
+  peerId: null,
+};
+
+export const ClientContext = createContext<IClient>(defaultClient);
 
 export const ClientProvider = ({ children }: any) => {
-  const [state, dispatch] = useReducer(reducer, create_initial_client())
+  const clientObject = useInitClient();
 
   return (
-    <ClientContext.Provider value={[state, dispatch]}>
+    <ClientContext.Provider value={clientObject}>
       {children}
     </ClientContext.Provider>
   )
 }
 
 export function useClient() {
-  const [client, dispatch] = useContext(ClientContext);
+  const client = useContext(ClientContext);
 
-  const toggle = () => dispatch({ type: 'toggle_button' });
+  return client;
+}
 
-  const setOpenCallback = (callback: any) => dispatch({ type: 'set_open_callback', payload: callback });
+function useInitClient(): IClient {
+  const [peer, setPeer] = useState<Peer | null>(null);
+  const [peerId, setPeerId] = useState<string | null>(null);
+  const [isConnected, setIsConnected] = useState<boolean>(false);
+  const [messages, setMessages] = useState<string[]>([]);
 
-  return { client, toggle, setOpenCallback };
+  const connection = useRef<DataConnection | null>(null);
+
+  useEffect(() => {
+    const peer = new Peer();
+
+    peer.on('open', (id) => {
+      console.log('My bloody peer ID is: ' + id);
+      console.log("What is this");
+      console.log(peer);
+      setPeerId(id);
+    });
+
+    peer.on('connection', function (conn) {
+      console.log("Connection received")
+      connection.current = conn;
+      setIsConnected(true);
+      conn.on('data', function (data) {
+        // Will print 'hi!'
+        console.log("Received data")
+        console.log(data);
+        setMessages((messages) => [...messages, data as string]);
+      });
+    });
+
+    setPeer(peer);
+
+    return () => {
+      peer.disconnect();
+      peer.destroy();
+    };
+  }, []);
+
+  const connectTo = (id: string) => {
+    console.log(`Connecting to ${id}`);
+
+    if (!peer) {
+      console.log("but Peer not initialized")
+      return;
+    }
+
+    const conn = peer.connect(id, { reliable: true });
+    connection.current = conn;
+    conn.on('open', function () {
+      console.log("Connection open")
+      setIsConnected(true);
+      conn.send('hi!');
+    });
+  }
+
+  return { peer, messages, connectTo, isConnected, peerId };
 }

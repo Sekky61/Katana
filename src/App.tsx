@@ -1,42 +1,18 @@
+import Peer from 'peerjs';
 import { ClientProvider, ClientContext, useClient } from './ClientContext'
 import ClientInfo from './ClientInfo';
-import Client from './client';
-
-// Provide interface to add files to share
-function SendBubble() {
-
-  const { client, setOpenCallback } = useClient();
-
-  const handleClick = () => {
-    setOpenCallback(() => {
-      console.log('open callback!!');
-    });
-  }
-
-  return (
-    <div className="bg-orange-300 rounded p-1">
-      <h2>Send</h2>
-      <button>Add files</button>
-      <h3>Shared files</h3>
-      <ul>
-        <li>file1</li>
-        <li>file2</li>
-      </ul>
-    </div>
-  );
-}
+import { readUserIDFromParams } from './ClientReducer';
+import SendBubble from './SendBubble';
 
 // Files available to download will be listed here
 function ReceiveBubble() {
 
-  const { client, toggle } = useClient();
-
-  const stateAsString = JSON.stringify(client.id, null, 2);
+  // const stateAsString = JSON.stringify(client?.id, null, 2);
 
   return (
-    <div className="bg-orange-300 rounded p-1">
+    <div className="bg-orange-300 rounded p-1 flex-grow">
       <h2>Receive</h2>
-      <p>State: {stateAsString}</p>
+      <p>State: -</p>
       <p>Connection status: <span id="conn_status"></span></p>
       <h3>Offered files</h3>
       <ul>
@@ -52,10 +28,10 @@ function Page() {
     <div className="container mx-auto px-4 mt-20">
       <h1 className='text-4xl mb-10'>File sender</h1>
 
-      <div className="flex mb-1">
+      <div className="mb-1">
         <ClientInfo></ClientInfo>
       </div>
-      <div className="flex gap-1">
+      <div className="flex gap-1 w-full">
         <SendBubble />
         <ReceiveBubble />
       </div>
