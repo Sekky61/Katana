@@ -1,5 +1,6 @@
 import { createContext, useReducer, useContext, useState, useEffect, useRef } from 'react';
 import Peer, { DataConnection } from 'peerjs';
+import { createHelloMessage } from './Protocol';
 
 export interface IClient {
   // The peer object
@@ -9,6 +10,7 @@ export interface IClient {
   messages: string[];
   // Connect to another peer
   connectTo: (id: string) => void;
+  sendMessage: (message: string) => void;
 }
 
 const defaultClient: IClient = {
@@ -16,13 +18,32 @@ const defaultClient: IClient = {
   isConnected: false,
   messages: [],
   connectTo: () => { },
+  sendMessage: () => { },
   peerId: null,
 };
 
 export const ClientContext = createContext<IClient>(defaultClient);
 
+// Read the user id from the url parameters
+export function readUserIDFromParams(): string | null {
+  const urlParams = new URLSearchParams(window.location.search);
+  return urlParams.get('id');
+}
+
 export const ClientProvider = ({ children }: any) => {
   const clientObject = useInitClient();
+  const isInitialized = clientObject.peer !== null;
+
+  const uId = readUserIDFromParams();
+  useEffect(function () {
+    if (!uId || !isInitialized) {
+      console.log("NOT connecting")
+      return;
+    }
+
+    console.log("23 Connecting to " + uId)
+    clientObject.connectTo(uId);
+  }, [isInitialized]);
 
   return (
     <ClientContext.Provider value={clientObject}>
@@ -45,33 +66,42 @@ function useInitClient(): IClient {
 
   const connection = useRef<DataConnection | null>(null);
 
-  useEffect(() => {
-    const peer = new Peer();
+  function registerConnection(p: Peer, conn: DataConnection) {
+    conn.on('open', function () {
+      // Send a hello message
+      const pId = p?.id;
+      if (!pId) {
+        console.warn("peerId is null before sending hello message")
+        return;
+      }
+      const helloMessage = createHelloMessage(pId);
+      conn.send(helloMessage);
+    });
 
-    peer.on('open', (id) => {
-      console.log('My bloody peer ID is: ' + id);
-      console.log("What is this");
-      console.log(peer);
+    conn.on('data', function (data) {
+      setMessages((messages) => [...messages, data as string]);
+    });
+  }
+
+  useEffect(function () {
+    const newPeer = new Peer();
+
+    newPeer.on('open', (id) => {
       setPeerId(id);
     });
 
-    peer.on('connection', function (conn) {
-      console.log("Connection received")
+    newPeer.on('connection', function (conn) {
       connection.current = conn;
       setIsConnected(true);
-      conn.on('data', function (data) {
-        // Will print 'hi!'
-        console.log("Received data")
-        console.log(data);
-        setMessages((messages) => [...messages, data as string]);
-      });
+
+      registerConnection(newPeer, conn);
     });
 
-    setPeer(peer);
+    setPeer(newPeer);
 
     return () => {
-      peer.disconnect();
-      peer.destroy();
+      newPeer.disconnect();
+      newPeer.destroy();
     };
   }, []);
 
@@ -79,18 +109,23 @@ function useInitClient(): IClient {
     console.log(`Connecting to ${id}`);
 
     if (!peer) {
-      console.log("but Peer not initialized")
+      console.warn("but Peer not initialized")
       return;
     }
 
     const conn = peer.connect(id, { reliable: true });
     connection.current = conn;
-    conn.on('open', function () {
-      console.log("Connection open")
-      setIsConnected(true);
-      conn.send('hi!');
-    });
+    registerConnection(peer, conn);
   }
 
-  return { peer, messages, connectTo, isConnected, peerId };
+  const sendMessage = (message: string) => {
+    if (!connection.current) {
+      console.warn("Connection not initialized")
+      return;
+    }
+
+    connection.current.send(message);
+  }
+
+  return { peer, messages, connectTo, isConnected, peerId, sendMessage };
 }

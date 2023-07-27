@@ -1,7 +1,6 @@
 import Peer from 'peerjs';
 import { ClientProvider, ClientContext, useClient } from './ClientContext'
 import ClientInfo from './ClientInfo';
-import { readUserIDFromParams } from './ClientReducer';
 import SendBubble from './SendBubble';
 
 // Files available to download will be listed here
