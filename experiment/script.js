@@ -2,6 +2,7 @@
 const b1 = document.querySelector('#b1');
 const b2 = document.querySelector('#b2');
 const b3 = document.querySelector('#b3');
+const b4 = document.querySelector('#b4');
 const in1 = document.querySelector('#in1');
 const idid = document.querySelector('#idid');
 
@@ -62,5 +63,25 @@ b3.addEventListener('click', function () {
     connection.send({
         messageType: 'hello',
         id: peer.id,
+    });
+});
+
+// File message
+// export interface FileInfo {
+//     name: string,
+//     size: number,
+// }
+
+// export interface OfferMessage extends ProtocolMessage {
+//     messageType: 'offer',
+//     offeredFile: FileInfo,
+// }
+b4.addEventListener('click', function () {
+    connection.send({
+        messageType: 'offer',
+        offeredFile: {
+            name: 'test.txt',
+            size: 100,
+        }
     });
 });

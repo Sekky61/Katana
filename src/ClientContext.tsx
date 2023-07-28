@@ -1,16 +1,16 @@
 import { createContext, useReducer, useContext, useState, useEffect, useRef } from 'react';
 import Peer, { DataConnection } from 'peerjs';
-import { createHelloMessage } from './Protocol';
+import { ProtocolMessage, createHelloMessage, isProtocolMessage } from './Protocol';
 
 export interface IClient {
   // The peer object
   peer: Peer | null;
   peerId: string | null;
   isConnected: boolean;
-  messages: string[];
+  messages: ProtocolMessage[];
   // Connect to another peer
   connectTo: (id: string) => void;
-  sendMessage: (message: string) => void;
+  sendMessage: (message: ProtocolMessage) => void;
 }
 
 const defaultClient: IClient = {
@@ -62,7 +62,7 @@ function useInitClient(): IClient {
   const [peer, setPeer] = useState<Peer | null>(null);
   const [peerId, setPeerId] = useState<string | null>(null);
   const [isConnected, setIsConnected] = useState<boolean>(false);
-  const [messages, setMessages] = useState<string[]>([]);
+  const [messages, setMessages] = useState<ProtocolMessage[]>([]);
 
   const connection = useRef<DataConnection | null>(null);
 
@@ -79,7 +79,11 @@ function useInitClient(): IClient {
     });
 
     conn.on('data', function (data) {
-      setMessages((messages) => [...messages, data as string]);
+      if (isProtocolMessage(data)) {
+        setMessages((messages) => [...messages, data]);
+      } else {
+        console.warn(`Received unknown message type ${typeof data}`);
+      }
     });
   }
 
@@ -118,7 +122,7 @@ function useInitClient(): IClient {
     registerConnection(peer, conn);
   }
 
-  const sendMessage = (message: string) => {
+  const sendMessage = (message: ProtocolMessage) => {
     if (!connection.current) {
       console.warn("Connection not initialized")
       return;

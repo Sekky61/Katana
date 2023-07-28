@@ -1,26 +1,29 @@
 // The protocol between two peers
 
-interface HelloMessage {
+export type ProtocolMessage = {
+    messageType: string
+};
+
+export interface HelloMessage extends ProtocolMessage {
     messageType: 'hello',
     id: string,
 }
 
-interface FileInfo {
+export interface FileInfo {
     name: string,
     size: number,
 }
 
-interface OfferMessage {
+export interface OfferMessage extends ProtocolMessage {
     messageType: 'offer',
     offeredFile: FileInfo,
 }
 
-interface AcceptMessage {
+export interface AcceptMessage extends ProtocolMessage {
     messageType: 'accept',
+    // Names of files that are accepted
     acceptedFiles: string[],
 }
-
-export type ProtocolMessage = HelloMessage | OfferMessage | AcceptMessage;
 
 export function createHelloMessage(id: string): HelloMessage {
     return {
