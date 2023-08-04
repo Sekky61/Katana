@@ -4,8 +4,8 @@ import { ProtocolMessage, createHelloMessage, isProtocolMessage } from './Protoc
 
 export interface IClient {
   // The peer object
-  peer: Peer | null;
   peerId: string | null;
+  isConnecting: boolean;
   isConnected: boolean;
   messages: ProtocolMessage[];
   // Connect to another peer
@@ -14,7 +14,7 @@ export interface IClient {
 }
 
 const defaultClient: IClient = {
-  peer: null,
+  isConnecting: false,
   isConnected: false,
   messages: [],
   connectTo: () => { },
@@ -32,18 +32,6 @@ export function readUserIDFromParams(): string | null {
 
 export const ClientProvider = ({ children }: any) => {
   const clientObject = useInitClient();
-  const isInitialized = clientObject.peer !== null;
-
-  const uId = readUserIDFromParams();
-  useEffect(function () {
-    if (!uId || !isInitialized) {
-      console.log("NOT connecting")
-      return;
-    }
-
-    console.log("23 Connecting to " + uId)
-    clientObject.connectTo(uId);
-  }, [isInitialized]);
 
   return (
     <ClientContext.Provider value={clientObject}>
@@ -59,8 +47,9 @@ export function useClient() {
 }
 
 function useInitClient(): IClient {
-  const [peer, setPeer] = useState<Peer | null>(null);
+  const peer = useRef<Peer | null>(null);
   const [peerId, setPeerId] = useState<string | null>(null);
+  const [isConnecting, setIsConnecting] = useState<boolean>(false);
   const [isConnected, setIsConnected] = useState<boolean>(false);
   const [messages, setMessages] = useState<ProtocolMessage[]>([]);
 
@@ -68,6 +57,9 @@ function useInitClient(): IClient {
 
   function registerConnection(p: Peer, conn: DataConnection) {
     conn.on('open', function () {
+      console.log("Connection opened");
+      setIsConnected(true);
+      setIsConnecting(false);
       // Send a hello message
       const pId = p?.id;
       if (!pId) {
@@ -90,6 +82,10 @@ function useInitClient(): IClient {
   useEffect(function () {
     const newPeer = new Peer();
 
+    newPeer.on('error', (err) => {
+      console.error(err);
+    });
+
     newPeer.on('open', (id) => {
       setPeerId(id);
     });
@@ -97,29 +93,47 @@ function useInitClient(): IClient {
     newPeer.on('connection', function (conn) {
       connection.current = conn;
       setIsConnected(true);
+      setIsConnecting(false);
 
       registerConnection(newPeer, conn);
     });
 
-    setPeer(newPeer);
+    peer.current = newPeer;
 
     return () => {
+      console.warn("Destroying peer")
+      setIsConnected(false);
+      setIsConnecting(false);
       newPeer.disconnect();
       newPeer.destroy();
     };
   }, []);
 
-  const connectTo = (id: string) => {
+  const connectTo = function (id: string) {
     console.log(`Connecting to ${id}`);
 
-    if (!peer) {
+    const p = peer.current;
+    if (!p) {
       console.warn("but Peer not initialized")
       return;
     }
 
-    const conn = peer.connect(id, { reliable: true });
+    if (p.destroyed || p.disconnected) {
+      console.warn("Peer is disconnected or destroyed so aborting connecting")
+      return;
+    }
+
+    if (isConnecting) {
+      console.warn("Already connecting")
+      return;
+    }
+
+    setIsConnecting(true);
+    const conn = p.connect(id, { reliable: true });
+    console.dir(peer)
+    console.dir(conn)
     connection.current = conn;
-    registerConnection(peer, conn);
+    registerConnection(p, conn);
   }
 
   const sendMessage = (message: ProtocolMessage) => {
@@ -131,5 +145,5 @@ function useInitClient(): IClient {
     connection.current.send(message);
   }
 
-  return { peer, messages, connectTo, isConnected, peerId, sendMessage };
+  return { messages, connectTo, isConnecting, isConnected, peerId, sendMessage };
 }

@@ -5,7 +5,7 @@ import { FileInfo, OfferMessage, createHelloMessage, isOfferMessage, isProtocolM
 // Provide interface to add files to share
 export default function SendBubble() {
 
-  const { peer, messages, connectTo, isConnected, sendMessage } = useClient();
+  const { peerId, messages, connectTo, isConnected, sendMessage } = useClient();
 
   const files: OfferMessage[] = messages.filter(isOfferMessage);
 
@@ -25,10 +25,10 @@ export default function SendBubble() {
   );
 
   const sendHello = () => {
-    if (!peer) {
+    if (!peerId) {
       return;
     }
-    const msg = createHelloMessage(peer.id);
+    const msg = createHelloMessage(peerId);
     sendMessage(msg);
   }
 

@@ -24,10 +24,10 @@ function onData(data) {
 }
 
 peer.on('connection', function (conn) {
-    console.log('connection');
     conn.on('data', onData);
     connection = conn;
-    console.log(`Connection: ${connection}`);
+    console.log(`New Connection:`);
+    console.dir(conn);
 });
 
 // On conn2, connect to peer from conn1 field

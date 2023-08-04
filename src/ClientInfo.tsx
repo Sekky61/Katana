@@ -62,15 +62,9 @@ function CopyLinkButton({ link }: { link: string }) {
 
 // Allow to change the client's ID
 export default function ClientInfo() {
-    const { peer, messages, connectTo, isConnected, peerId } = useClient();
-
-    console.log(`From component: messages: ${messages}`)
-    console.log(`From component: isConnected: ${isConnected}`)
+    const { messages, connectTo, isConnected, peerId } = useClient();
 
     const base = window.location.href;
-
-    console.log("peerid is now seen as " + peerId)
-
     const link = peerId ? `${base}?id=${peerId}` : null;
 
     const shareLink = link ? (
