@@ -1,6 +1,6 @@
 import { createContext, useReducer, useContext, useState, useEffect, useRef } from 'react';
 import Peer, { DataConnection } from 'peerjs';
-import { ProtocolMessage, createHelloMessage, isProtocolMessage } from './Protocol';
+import { FileInfo, ProtocolMessage, createHelloMessage, isOfferMessage, isProtocolMessage } from './Protocol';
 
 export interface IClient {
   // The peer object
@@ -8,6 +8,7 @@ export interface IClient {
   isConnecting: boolean;
   isConnected: boolean;
   messages: ProtocolMessage[];
+  offeredFiles: FileInfo[];
   // Connect to another peer
   connectTo: (id: string) => void;
   sendMessage: (message: ProtocolMessage) => void;
@@ -17,6 +18,7 @@ const defaultClient: IClient = {
   isConnecting: false,
   isConnected: false,
   messages: [],
+  offeredFiles: [],
   connectTo: () => { },
   sendMessage: () => { },
   peerId: null,
@@ -47,13 +49,15 @@ export function useClient() {
 }
 
 function useInitClient(): IClient {
+
   const peer = useRef<Peer | null>(null);
+  const connection = useRef<DataConnection | null>(null);
   const [peerId, setPeerId] = useState<string | null>(null);
   const [isConnecting, setIsConnecting] = useState<boolean>(false);
   const [isConnected, setIsConnected] = useState<boolean>(false);
-  const [messages, setMessages] = useState<ProtocolMessage[]>([]);
 
-  const connection = useRef<DataConnection | null>(null);
+  const [messages, setMessages] = useState<ProtocolMessage[]>([]);
+  const [offeredFiles, setOfferedFiles] = useState<FileInfo[]>([]);
 
   function registerConnection(p: Peer, conn: DataConnection) {
     conn.on('open', function () {
@@ -73,6 +77,9 @@ function useInitClient(): IClient {
     conn.on('data', function (data) {
       if (isProtocolMessage(data)) {
         setMessages((messages) => [...messages, data]);
+        if (isOfferMessage(data)) {
+          setOfferedFiles((files) => [...files, data.offeredFile]);
+        }
       } else {
         console.warn(`Received unknown message type ${typeof data}`);
       }
@@ -145,5 +152,5 @@ function useInitClient(): IClient {
     connection.current.send(message);
   }
 
-  return { messages, connectTo, isConnecting, isConnected, peerId, sendMessage };
+  return { messages, offeredFiles, connectTo, isConnecting, isConnected, peerId, sendMessage };
 }

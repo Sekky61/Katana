@@ -3,25 +3,7 @@ import { ClientProvider, ClientContext, useClient, readUserIDFromParams } from '
 import ClientInfo from './ClientInfo';
 import SendBubble from './SendBubble';
 import { useEffect } from 'react';
-
-// Files available to download will be listed here
-function ReceiveBubble() {
-
-  // const stateAsString = JSON.stringify(client?.id, null, 2);
-
-  return (
-    <div className="bg-orange-300 rounded p-1 flex-grow">
-      <h2>Receive</h2>
-      <p>State: -</p>
-      <p>Connection status: <span id="conn_status"></span></p>
-      <h3>Offered files</h3>
-      <ul>
-        <li>file1</li>
-        <li>file2</li>
-      </ul>
-    </div>
-  );
-}
+import ReceiveBubble from './ReceiveBubble';
 
 function Page() {
 

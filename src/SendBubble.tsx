@@ -1,13 +1,14 @@
 import Peer from "peerjs";
 import { useClient } from "./ClientContext";
 import { FileInfo, OfferMessage, createHelloMessage, isOfferMessage, isProtocolMessage } from "./Protocol";
+import { ChangeEvent, useState } from "react";
 
 // Provide interface to add files to share
 export default function SendBubble() {
 
   const { peerId, messages, connectTo, isConnected, sendMessage } = useClient();
 
-  const files: OfferMessage[] = messages.filter(isOfferMessage);
+  const [offeredFiles, setOfferedFiles] = useState<File[]>([]);
 
   const messagesList = (
     <ul>
@@ -32,30 +33,22 @@ export default function SendBubble() {
     sendMessage(msg);
   }
 
+  const handleFileChange = (e: ChangeEvent<HTMLInputElement>) => {
+    if (e.target.files) {
+      setOfferedFiles([...offeredFiles, ...Array.from(e.target.files)])
+    }
+  };
+
+  console.log(offeredFiles);
+
   return (
     <div className="bg-orange-300 rounded p-1 flex-grow">
       <h2 className="text-xl">Send</h2>
-      <button>Add files</button>
+      <label htmlFor="multiple_files" className="hover:cursor-pointer p-1 bg-orange-400">Add multiple files</label>
+      <input id="multiple_files" type="file" multiple onChange={handleFileChange} className="hidden"></input>
       <h3 className="text-lg">Shared files</h3>
       {isConnected ? messagesList : <p>Not connected</p>}
       <button onClick={sendHello}>Send rn</button>
-      <div>
-        <ul className="flex flex-col gap-1">
-          {files.map((file, index) => {
-            return <FileListing key={index} file={file.offeredFile} />
-          })}
-        </ul>
-      </div>
     </div>
-  );
-}
-
-function FileListing({ file }: { file: FileInfo }) {
-  return (
-    <li className="flex border px-2">
-      <input type="checkbox" name="" id="" className="w-4 mr-2" />
-      <div className="flex-grow">{file.name}</div>
-      <div>{file.size}B</div>
-    </li>
   );
 }
