@@ -16,8 +16,10 @@ export interface Actions<K, V> {
     reset: Map<K, V>['clear']
 }
 
+export type MyMap<K, V> = Omit<Map<K, V>, 'set' | 'clear' | 'delete'>;
+
 // We hide some setters from the returned map to disable autocompletion
-type Return<K, V> = [Omit<Map<K, V>, 'set' | 'clear' | 'delete'>, Actions<K, V>]
+type Return<K, V> = [MyMap<K, V>, Actions<K, V>]
 
 export function useMap<K, V>(
     initialState: MapOrEntries<K, V> = new Map(),

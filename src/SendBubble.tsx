@@ -1,28 +1,12 @@
 import { FileInfo, OfferMessage, createHelloMessage, isOfferMessage, isProtocolMessage } from "./Protocol";
 import { ChangeEvent, useState } from "react";
-import { useFileSharing } from "./hooks/useFileSharing";
+import { useFileSharingClientContext } from "./util/FileSharingClientContext";
+import { OfferedFile } from "./hooks/useFileSharingClient";
 
 // Provide interface to add files to share
 export default function SendBubble() {
 
-  const { client: { peerId, messages, connectTo, isConnected, sendMessage } } = useFileSharing();
-
-  const [offeredFiles, setOfferedFiles] = useState(new Map<string, FileInfo>());
-
-  const messagesList = (
-    <ul>
-      {messages.map((message: any, index: number) => {
-        if (isProtocolMessage(message)) {
-          return <li key={index}>{message.messageType}</li>
-        } else if (typeof message === 'string') {
-          return <li key={index}>{message}</li>
-        } else {
-          throw new Error("Unknown message type " + typeof message)
-        }
-      })
-      }
-    </ul>
-  );
+  const { client: { peerId, sendMessage }, myOfferedFiles, offerFile, unOfferFile } = useFileSharingClientContext();
 
   const sendHello = () => {
     if (!peerId) {
@@ -37,20 +21,14 @@ export default function SendBubble() {
       return;
     }
 
-    for (const file of Array.from(e.target.files)) {
-      if (!offeredFiles.has(file.name)) {
-        offeredFiles.set(file.name, {
-          name: file.name,
-          size: file.size,
-        });
-      }
+    // offer each file
+    for (const file of e.target.files) {
+      offerFile(file);
     }
-    setOfferedFiles(new Map(offeredFiles))
   };
 
-  const removeOfferedFile = (filename: string) => {
-    offeredFiles.delete(filename);
-    setOfferedFiles(new Map(offeredFiles));
+  const removeOfferedFile = (file: FileInfo) => {
+    unOfferFile(file);
   }
 
   return (
@@ -59,9 +37,8 @@ export default function SendBubble() {
       <label htmlFor="multiple_files" className="hover:cursor-pointer p-1 bg-orange-400">Add multiple files</label>
       <input id="multiple_files" type="file" multiple onChange={handleFileChange} className="hidden"></input>
       <h3 className="text-lg">Shared files</h3>
-      {isConnected ? messagesList : <p>Not connected</p>}
       <ul className="flex flex-col gap-1">
-        {[...offeredFiles.values()].map((file, index) => {
+        {[...myOfferedFiles.values()].map((file, index) => {
           return <FileListing key={index} file={file} handleRemove={removeOfferedFile} />
         })}
       </ul>
@@ -71,17 +48,19 @@ export default function SendBubble() {
 }
 
 interface FileListingProps {
-  file: FileInfo;
-  handleRemove: (filename: string) => void;
+  file: OfferedFile;
+  handleRemove: (filename: FileInfo) => void;
 }
 
 function FileListing({ file, handleRemove }: FileListingProps) {
 
+  const { fileInfo } = file;
+
   return (
     <li className="flex border px-2">
-      <div className="flex-grow">{file.name}</div>
-      <div>{file.size}B</div>
-      <button onClick={() => handleRemove(file.name)}>Delete</button>
+      <div className="flex-grow">{fileInfo.name}</div>
+      <div>{fileInfo.size}B</div>
+      <button onClick={() => handleRemove(fileInfo)}>Delete</button>
     </li>
   );
 }

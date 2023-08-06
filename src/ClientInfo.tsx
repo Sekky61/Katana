@@ -2,7 +2,7 @@
 
 import { useEffect, useState } from "react";
 import QRCode from 'qrcode';
-import { useFileSharing } from "./hooks/useFileSharing";
+import { useFileSharingClientContext } from "./util/FileSharingClientContext";
 
 function QrCode({ link }: { link: string }) {
 
@@ -62,7 +62,7 @@ function CopyLinkButton({ link }: { link: string }) {
 
 // Allow to change the client's ID
 export default function ClientInfo() {
-    const { client: { isConnected, peerId } } = useFileSharing();
+    const { client: { isConnected, peerId } } = useFileSharingClientContext();
 
     const base = window.location.href;
     const link = peerId ? `${base}?id=${peerId}` : null;

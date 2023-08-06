@@ -1,15 +1,14 @@
 import Peer from 'peerjs';
-import { ClientProvider, ClientContext } from './util/ClientContext'
+import { ClientProvider, FileSharingClientContext, useFileSharingClientContext } from './util/FileSharingClientContext'
 import ClientInfo from './ClientInfo';
 import SendBubble from './SendBubble';
 import { useEffect } from 'react';
 import ReceiveBubble from './ReceiveBubble';
 import { readUserIDFromParams } from './util/misc';
-import { useFileSharing } from './hooks/useFileSharing';
 
 function Page() {
 
-  const { client } = useFileSharing();
+  const { client } = useFileSharingClientContext();
 
   const othersId = readUserIDFromParams();
 

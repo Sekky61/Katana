@@ -9,33 +9,38 @@ export interface PeerClient {
     peerId: string | null;
     isConnecting: boolean;
     isConnected: boolean;
-    messages: ProtocolMessage[];
-    // Files offered TO me
-    offeredFiles: FileInfo[];
     // Connect to another peer
     connectTo: (id: string) => void;
     sendMessage: (message: ProtocolMessage) => void;
 }
 
+export interface PeerCallbacks {
+    onConnectionOpened: (conn: DataConnection) => void;
+    onConnectionClosed: () => void;
+    onMessageReceived: (message: ProtocolMessage) => void;
+}
+
 // The peer client context
 // Does not handle business logic, only provides the peer client
 // Capable of sending and receiving messages of type ProtocolMessage
-export function usePeerClient(): PeerClient {
+export function usePeerClient(callbacks: PeerCallbacks): PeerClient {
+
+    const callbacksRef = useRef(callbacks);
 
     const peer = useRef<Peer | null>(null);
     const connection = useRef<DataConnection | null>(null);
+
     const [peerId, setPeerId] = useState<string | null>(null);
     const [isConnecting, setIsConnecting] = useState<boolean>(false);
     const [isConnected, setIsConnected] = useState<boolean>(false);
 
-    const [messages, setMessages] = useState<ProtocolMessage[]>([]);
-
-    const [myOfferedFiles, setMyOfferedFiles] = useState<FileInfo[]>([]); // Files offered by me
-    const [offeredFiles, setOfferedFiles] = useState<FileInfo[]>([]);     // Files offered to me
+    useEffect(() => {
+        callbacksRef.current = callbacks; // Update ref to the latest callback.
+    }, [callbacks])
 
     function registerConnection(p: Peer, conn: DataConnection) {
         conn.on('open', function () {
-            console.log("Connection opened");
+            console.log("Connection opened inner")
             setIsConnected(true);
             setIsConnecting(false);
             // Send a hello message
@@ -44,16 +49,12 @@ export function usePeerClient(): PeerClient {
                 console.warn("peerId is null before sending hello message")
                 return;
             }
-            const helloMessage = createHelloMessage(pId);
-            conn.send(helloMessage);
+            callbacksRef.current.onConnectionOpened(conn);
         });
 
         conn.on('data', function (data) {
             if (isProtocolMessage(data)) {
-                setMessages((messages) => [...messages, data]);
-                if (isOfferMessage(data)) {
-                    setOfferedFiles((files) => [...files, data.offeredFile]);
-                }
+                callbacksRef.current.onMessageReceived(data);
             } else {
                 console.warn(`Received unknown message type ${typeof data}`);
             }
@@ -69,13 +70,14 @@ export function usePeerClient(): PeerClient {
 
         newPeer.on('open', (id) => {
             setPeerId(id);
+            setIsConnected(false);
+            setIsConnecting(false);
         });
 
         newPeer.on('connection', function (conn) {
             connection.current = conn;
             setIsConnected(true);
             setIsConnecting(false);
-
             registerConnection(newPeer, conn);
         });
 
@@ -87,6 +89,7 @@ export function usePeerClient(): PeerClient {
             setIsConnecting(false);
             newPeer.disconnect();
             newPeer.destroy();
+            callbacksRef.current.onConnectionClosed();
         };
     }, []);
 
@@ -119,12 +122,13 @@ export function usePeerClient(): PeerClient {
 
     const sendMessage = (message: any) => {
         if (!connection.current) {
-            console.warn("Connection not initialized")
+            console.warn("Connection not initialized. IsConnected: " + isConnected)
+            console.log(peer.current)
             return;
         }
         // const chunked = true;
         connection.current.send(message);
     }
 
-    return { messages, offeredFiles, connectTo, isConnecting, isConnected, peerId, sendMessage };
+    return { connectTo, isConnecting, isConnected, peerId, sendMessage };
 }
