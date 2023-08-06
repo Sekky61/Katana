@@ -1,6 +1,6 @@
 import { useEffect, useState } from "react";
-import { useClient } from "./ClientContext";
 import { FileInfo, OfferMessage, isOfferMessage } from "./Protocol";
+import { useFileSharing } from "./hooks/useFileSharing";
 
 // To keep track of which files are selected, being downloaded
 interface FileMetadata {
@@ -14,7 +14,7 @@ type FileMetadataMap = Map<string, FileMetadata>;
 // Files available to download will be listed here
 export default function ReceiveBubble() {
 
-    const { offeredFiles } = useClient();
+    const { client: { offeredFiles } } = useFileSharing();
 
     const [files, setFiles] = useState<FileMetadataMap>(new Map());
     const nOfFiles = files.size;

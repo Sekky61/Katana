@@ -19,6 +19,11 @@ export interface OfferMessage extends ProtocolMessage {
     offeredFile: FileInfo,
 }
 
+export interface UnOfferMessage extends ProtocolMessage {
+    messageType: 'unoffer',
+    unOfferedFile: FileInfo,
+}
+
 export interface AcceptMessage extends ProtocolMessage {
     messageType: 'accept',
     // Names of files that are accepted

@@ -1,13 +1,15 @@
 import Peer from 'peerjs';
-import { ClientProvider, ClientContext, useClient, readUserIDFromParams } from './ClientContext'
+import { ClientProvider, ClientContext } from './util/ClientContext'
 import ClientInfo from './ClientInfo';
 import SendBubble from './SendBubble';
 import { useEffect } from 'react';
 import ReceiveBubble from './ReceiveBubble';
+import { readUserIDFromParams } from './util/misc';
+import { useFileSharing } from './hooks/useFileSharing';
 
 function Page() {
 
-  const client = useClient();
+  const { client } = useFileSharing();
 
   const othersId = readUserIDFromParams();
 
@@ -25,7 +27,7 @@ function Page() {
       <div className="mb-1">
         <ClientInfo></ClientInfo>
       </div>
-      <div className="flex gap-1 w-full">
+      <div className="grid grid-cols-2 gap-1">
         <SendBubble />
         <ReceiveBubble />
       </div>

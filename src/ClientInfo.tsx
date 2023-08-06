@@ -1,8 +1,8 @@
 // Display information about yourself and the peer
 
 import { useEffect, useState } from "react";
-import { useClient } from "./ClientContext";
 import QRCode from 'qrcode';
+import { useFileSharing } from "./hooks/useFileSharing";
 
 function QrCode({ link }: { link: string }) {
 
@@ -62,7 +62,7 @@ function CopyLinkButton({ link }: { link: string }) {
 
 // Allow to change the client's ID
 export default function ClientInfo() {
-    const { messages, connectTo, isConnected, peerId } = useClient();
+    const { client: { isConnected, peerId } } = useFileSharing();
 
     const base = window.location.href;
     const link = peerId ? `${base}?id=${peerId}` : null;
