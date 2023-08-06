@@ -3,6 +3,7 @@
 import { createContext, useReducer, useContext, useState, useEffect, useRef } from 'react';
 import Peer, { DataConnection } from 'peerjs';
 import { FileInfo, OfferMessage, ProtocolMessage, UnOfferMessage, createHelloMessage, isOfferMessage, isProtocolMessage } from '../Protocol';
+import useUnload from './useUnload';
 
 export interface PeerClient {
     // The peer object
@@ -36,7 +37,7 @@ export function usePeerClient(callbacks: PeerCallbacks): PeerClient {
 
     useEffect(() => {
         callbacksRef.current = callbacks; // Update ref to the latest callback.
-    }, [callbacks])
+    }, [callbacks]);
 
     function registerConnection(p: Peer, conn: DataConnection) {
         conn.on('open', function () {
@@ -58,6 +59,13 @@ export function usePeerClient(callbacks: PeerCallbacks): PeerClient {
             } else {
                 console.warn(`Received unknown message type ${typeof data}`);
             }
+        });
+
+        conn.on('close', function () {
+            console.log("Connection closed inner")
+            setIsConnected(false);
+            setIsConnecting(false);
+            callbacksRef.current.onConnectionClosed();
         });
     }
 
@@ -92,6 +100,16 @@ export function usePeerClient(callbacks: PeerCallbacks): PeerClient {
             callbacksRef.current.onConnectionClosed();
         };
     }, []);
+
+    // When the user leaves the page, disconnect from the peer
+    useUnload(() => {
+        console.warn("Destroying peer")
+        setIsConnected(false);
+        setIsConnecting(false);
+        peer.current?.disconnect();
+        peer.current?.destroy();
+        callbacksRef.current.onConnectionClosed();
+    });
 
     const connectTo = function (id: string) {
         console.log(`Connecting to ${id}`);

@@ -9,25 +9,30 @@ import { DataConnection } from 'peerjs';
 import { fileToFileInfo } from '../util/misc';
 import { useCallback } from 'react';
 
-export interface OfferedFile {
+export interface MyOfferedFile {
     file: File,
     fileInfo: FileInfo,
+}
+
+export interface OfferedFile {
+    fileInfo: FileInfo,
+    downloadStatus: { isDownloading: boolean, progress: number },
 }
 
 export interface FileSharingClient {
     client: PeerClient;
     // Files offered by this client
-    myOfferedFiles: MyMap<string, OfferedFile>;
+    myOfferedFiles: MyMap<string, MyOfferedFile>;
     // Files offered by peer
-    offeredFiles: MyMap<string, FileInfo>;
+    offeredFiles: MyMap<string, OfferedFile>;
     offerFile: (file: File) => void;
     unOfferFile: (file: FileInfo) => void;
 }
 
 export function useFileSharingClient(): FileSharingClient {
 
-    const [myOfferedFiles, myOfferedFilesActions] = useMap<string, OfferedFile>();
-    const [offeredFiles, offeredFilesActions] = useMap<string, FileInfo>();
+    const [myOfferedFiles, myOfferedFilesActions] = useMap<string, MyOfferedFile>();
+    const [offeredFiles, offeredFilesActions] = useMap<string, OfferedFile>();
 
     const onConnectionOpened = (conn: DataConnection) => {
         console.log("CONN FROM CALLBACK", conn);
@@ -36,16 +41,22 @@ export function useFileSharingClient(): FileSharingClient {
         // conn.send(helloMessage);
     };
 
-    const onConnectionClosed = () => {
+    const onConnectionClosed = useCallback(() => {
         console.log("Connection closed");
-    };
+        // Delete offered files
+        offeredFilesActions.reset();
+    }, [offeredFilesActions]);
 
     const onMessageReceived = useCallback((message: ProtocolMessage) => {
         console.log("Message received FROM CALLBACK");
         console.dir(message)
         console.dir(offeredFilesActions)
         if (isOfferMessage(message)) {
-            offeredFilesActions.set(message.offeredFile.name, message.offeredFile);
+            const offeredFile: OfferedFile = {
+                fileInfo: message.offeredFile,
+                downloadStatus: { isDownloading: false, progress: 0 },
+            };
+            offeredFilesActions.set(message.offeredFile.name, offeredFile);
         } else {
             console.warn(`Unhandled message type ${typeof message}`);
             console.dir(message);
@@ -60,7 +71,7 @@ export function useFileSharingClient(): FileSharingClient {
 
     const offerFile = useCallback((file: File) => {
         const fileInfo = fileToFileInfo(file);
-        const offeredFile: OfferedFile = {
+        const offeredFile: MyOfferedFile = {
             file: file,
             fileInfo: fileInfo,
         };

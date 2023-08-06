@@ -1,7 +1,7 @@
 import { FileInfo, OfferMessage, createHelloMessage, isOfferMessage, isProtocolMessage } from "./Protocol";
 import { ChangeEvent, useState } from "react";
 import { useFileSharingClientContext } from "./util/FileSharingClientContext";
-import { OfferedFile } from "./hooks/useFileSharingClient";
+import { MyOfferedFile } from "./hooks/useFileSharingClient";
 
 // Provide interface to add files to share
 export default function SendBubble() {
@@ -48,7 +48,7 @@ export default function SendBubble() {
 }
 
 interface FileListingProps {
-  file: OfferedFile;
+  file: MyOfferedFile;
   handleRemove: (filename: FileInfo) => void;
 }
 

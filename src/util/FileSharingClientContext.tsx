@@ -7,7 +7,7 @@ import { usePeerClient, PeerClient } from '../hooks/usePeerClient';
 import Peer, { DataConnection } from 'peerjs';
 import { FileInfo, OfferMessage, ProtocolMessage, UnOfferMessage } from '../Protocol';
 import { MyMap, useMap } from '../hooks/useMap';
-import { FileSharingClient, OfferedFile, useFileSharingClient } from '../hooks/useFileSharingClient';
+import { FileSharingClient, MyOfferedFile, OfferedFile, useFileSharingClient } from '../hooks/useFileSharingClient';
 
 const defaultClient: PeerClient = {
   peerId: null,
@@ -19,8 +19,8 @@ const defaultClient: PeerClient = {
 
 const defaultFileSharingClient = {
   client: defaultClient,
-  myOfferedFiles: new Map<string, OfferedFile>(),
-  offeredFiles: new Map<string, FileInfo>(),
+  myOfferedFiles: new Map<string, MyOfferedFile>(),
+  offeredFiles: new Map<string, OfferedFile>(),
   offerFile: (file: File) => { },
   unOfferFile: (file: FileInfo) => { },
 };

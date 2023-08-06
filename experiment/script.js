@@ -8,6 +8,7 @@ const idid = document.querySelector('#idid');
 
 const conn1 = document.querySelector('#conn1');
 const conn2 = document.querySelector('#conn2');
+const disconnect = document.querySelector('#disconnect');
 
 var send = true;
 var peer = new Peer();
@@ -39,6 +40,12 @@ conn2.addEventListener('click', () => {
         conn.send('hi!');
     });
     connection = conn;
+});
+
+disconnect.addEventListener('click', () => {
+    console.log("Closing connection");
+    connection.close();
+    connection = null;
 });
 
 // Add event listener to b1 button
