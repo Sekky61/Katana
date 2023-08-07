@@ -1,5 +1,8 @@
 {
     "[css]": {
         "editor.formatOnSave": false
+    },
+    "yaml.schemas": {
+        "https://json.schemastore.org/github-workflow.json": "file:///mnt/data/projects/Katana/.github/workflows/deploy.yml"
     }
 }
