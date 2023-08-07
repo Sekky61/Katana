@@ -1,21 +1,13 @@
-import { FileInfo, OfferMessage, createHelloMessage, isOfferMessage, isProtocolMessage } from "./Protocol";
-import { ChangeEvent, useState } from "react";
-import { useFileSharingClientContext } from "./util/FileSharingClientContext";
-import { MyOfferedFile } from "./hooks/useFileSharingClient";
+import { FileInfo } from "../misc/Protocol";
+import { ChangeEvent } from "react";
+import { useFileSharingClientContext } from "../misc/FileSharingClientContext";
+import { MyOfferedFile } from "../hooks/useFileSharingClient";
 import prettyBytes from "pretty-bytes";
 
 // Provide interface to add files to share
 export default function SendBubble() {
 
-  const { client: { peerId, sendMessage }, myOfferedFiles, offerFile, unOfferFile } = useFileSharingClientContext();
-
-  const sendHello = () => {
-    if (!peerId) {
-      return;
-    }
-    const msg = createHelloMessage(peerId);
-    sendMessage(msg);
-  }
+  const { myOfferedFiles, offerFile, unOfferFile } = useFileSharingClientContext();
 
   const handleFileChange = (e: ChangeEvent<HTMLInputElement>) => {
     if (!e.target.files) {

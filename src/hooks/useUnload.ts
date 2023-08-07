@@ -7,19 +7,19 @@ import { useRef, useEffect } from 'react';
 type BeforeUnloadEventListener = (ev: BeforeUnloadEvent) => any;
 
 const useUnload = (fn: BeforeUnloadEventListener) => {
-    const cb = useRef(fn); // init with fn, so that type checkers won't assume that current might be undefined
+  const cb = useRef(fn); // init with fn, so that type checkers won't assume that current might be undefined
 
-    useEffect(() => {
-        cb.current = fn;
-    }, [fn]);
+  useEffect(() => {
+    cb.current = fn;
+  }, [fn]);
 
-    useEffect(() => {
-        const onUnload = (ev: BeforeUnloadEvent) => cb.current?.(ev);
+  useEffect(() => {
+    const onUnload = (ev: BeforeUnloadEvent) => cb.current?.(ev);
 
-        window.addEventListener("beforeunload", onUnload);
+    window.addEventListener("beforeunload", onUnload);
 
-        return () => window.removeEventListener("beforeunload", onUnload);
-    }, []);
+    return () => window.removeEventListener("beforeunload", onUnload);
+  }, []);
 };
 
 export default useUnload;

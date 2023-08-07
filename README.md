@@ -1,8 +1,8 @@
 # Katana - P2P file transfer in browser
 
-P2P file transfer using [peerjs](https://peerjs.com/) library. [Deployed](https://sekky61.github.io/Katana/) with GitHub pages.
+P2P file transfer using [peerjs](https://peerjs.com/) library. [Try it now!](https://sekky61.github.io/Katana/)
 
-Not in fully working state. Tested on current Google Chrome.
+Not in fully working state. Tested on current Google Chrome. Deployed using GitHub pages.
 
 ## Development
 

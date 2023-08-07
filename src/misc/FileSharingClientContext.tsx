@@ -2,11 +2,9 @@
 // 
 // A single connection is needed, it is provided by the ClientContext and can be accessed by the usePeer hook.
 
-import { createContext, useContext, useState } from 'react';
-import { usePeerClient, PeerClient } from '../hooks/usePeerClient';
-import Peer, { DataConnection } from 'peerjs';
-import { FileInfo, OfferMessage, ProtocolMessage, UnOfferMessage } from '../Protocol';
-import { MyMap, useMap } from '../hooks/useMap';
+import { createContext, useContext } from 'react';
+import { PeerClient } from '../hooks/usePeerClient';
+import { FileInfo } from './Protocol';
 import { FileSharingClient, MyOfferedFile, OfferedFile, useFileSharingClient } from '../hooks/useFileSharingClient';
 
 const defaultClient: PeerClient = {
