@@ -1,6 +1,7 @@
 import { ChangeEvent, useEffect, useState } from "react";
 import { FileInfo, OfferMessage, isOfferMessage } from "./Protocol";
 import { useFileSharingClientContext } from "./util/FileSharingClientContext";
+import prettyBytes from "pretty-bytes";
 
 // Files available to download will be listed here
 export default function ReceiveBubble() {
@@ -30,12 +31,13 @@ export default function ReceiveBubble() {
     }
 
     return (
-        <div className="bg-orange-300 rounded p-1 flex-grow">
-            <h2>Receive</h2>
-            <p>Connection status: <span id="conn_status"></span></p>
-            <h3>Offered files</h3>
+        <div className="bg-orange-300 rounded flex-grow">
+            <div className="p-1">
+                <h2 className="text-xl">Download files</h2>
+                <h3>Offered files</h3>
+            </div>
             <div>
-                <ul className="flex flex-col gap-1">
+                <ul className="flex flex-col divide-y-2 border-y-2 border-white divide-white">
                     {[...offeredFiles.values()].map((offeredFile, index) => {
                         return <FileListing key={index} isChecked={isChecked(index)} file={offeredFile.fileInfo} onCheck={(checked) => {
                             selectFile(index, checked);
@@ -43,8 +45,11 @@ export default function ReceiveBubble() {
                     })}
                 </ul>
             </div>
-            <p>Files selected: {nOfPickedFiles} / {nOfFiles}</p>
-            <button onClick={handleDownload}>Download</button>
+            <div className="flex items-center gap-2 mt-2">
+                <button onClick={handleDownload} className="button">Download</button>
+                <p>(selected {nOfPickedFiles} / {nOfFiles} files)</p>
+            </div>
+            <div className="w-8 h-8"></div>
         </div>
     );
 }
@@ -57,6 +62,7 @@ interface FileListingProps {
 
 function FileListing({ isChecked, file, onCheck }: FileListingProps) {
     const { name, size } = file;
+    const prettySize = prettyBytes(size);
 
     const localHandleCheck = (event: ChangeEvent<HTMLInputElement>) => {
         const checked = event.target.checked;
@@ -64,10 +70,10 @@ function FileListing({ isChecked, file, onCheck }: FileListingProps) {
     };
 
     return (
-        <li className="flex border px-2">
-            <input type="checkbox" value={name} className="w-4 mr-2" onChange={localHandleCheck} checked={isChecked} />
-            <div className="flex-grow">{name}</div>
-            <div>{size}B</div>
+        <li className="flex items-center px-1 gap-3 py-1">
+            <input type="checkbox" value={name} className="w-5 h-5 shrink-0 accent-orange-600 bg-gray-100 border-gray-300" onChange={localHandleCheck} checked={isChecked} />
+            <div className="flex-grow truncate">{name}</div>
+            <div className="whitespace-nowrap text-sm">{prettySize}</div>
         </li>
     );
 }

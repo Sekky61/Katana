@@ -5,3 +5,7 @@
 .animation-duration-2000 {
     animation-duration: 2000ms;
 }
+
+.button {
+    @apply hover:cursor-pointer px-2 py-1 bg-orange-400 hover:bg-orange-500 rounded;
+}

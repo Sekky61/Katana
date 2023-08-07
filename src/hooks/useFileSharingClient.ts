@@ -5,7 +5,7 @@
 import { FileInfo, OfferMessage, ProtocolMessage, UnOfferMessage, createHelloMessage, isOfferMessage, isProtocolMessage } from '../Protocol';
 import { PeerClient, usePeerClient } from './usePeerClient';
 import { MyMap, useMap } from './useMap';
-import { DataConnection } from 'peerjs';
+import Peer, { DataConnection } from 'peerjs';
 import { fileToFileInfo } from '../util/misc';
 import { useCallback } from 'react';
 
@@ -34,23 +34,22 @@ export function useFileSharingClient(): FileSharingClient {
     const [myOfferedFiles, myOfferedFilesActions] = useMap<string, MyOfferedFile>();
     const [offeredFiles, offeredFilesActions] = useMap<string, OfferedFile>();
 
-    const onConnectionOpened = (conn: DataConnection) => {
+    const onConnectionOpened = (peer: Peer, conn: DataConnection) => {
         console.log("CONN FROM CALLBACK", conn);
 
-        // const helloMessage = createHelloMessage(pId);
-        // conn.send(helloMessage);
+        const helloMessage = createHelloMessage(peer.id);
+        conn.send(helloMessage);
     };
 
-    const onConnectionClosed = useCallback(() => {
+    const onConnectionClosed = (peer: Peer) => {
         console.log("Connection closed");
         // Delete offered files
         offeredFilesActions.reset();
-    }, [offeredFilesActions]);
+    };
 
-    const onMessageReceived = useCallback((message: ProtocolMessage) => {
+    const onMessageReceived = (peer: Peer, message: ProtocolMessage) => {
         console.log("Message received FROM CALLBACK");
         console.dir(message)
-        console.dir(offeredFilesActions)
         if (isOfferMessage(message)) {
             const offeredFile: OfferedFile = {
                 fileInfo: message.offeredFile,
@@ -59,9 +58,8 @@ export function useFileSharingClient(): FileSharingClient {
             offeredFilesActions.set(message.offeredFile.name, offeredFile);
         } else {
             console.warn(`Unhandled message type ${typeof message}`);
-            console.dir(message);
         }
-    }, [offeredFilesActions]);
+    };
 
     const client = usePeerClient({
         onConnectionOpened,
@@ -69,7 +67,7 @@ export function useFileSharingClient(): FileSharingClient {
         onMessageReceived
     });
 
-    const offerFile = useCallback((file: File) => {
+    const offerFile = (file: File) => {
         const fileInfo = fileToFileInfo(file);
         const offeredFile: MyOfferedFile = {
             file: file,
@@ -82,7 +80,7 @@ export function useFileSharingClient(): FileSharingClient {
         console.log("OFFER FILE", offerMessage)
         myOfferedFilesActions.set(file.name, offeredFile);
         client.sendMessage(offerMessage);
-    }, [client, myOfferedFilesActions]);
+    };
 
     const unOfferFile = (file: FileInfo) => {
         const unOfferMessage: UnOfferMessage = {

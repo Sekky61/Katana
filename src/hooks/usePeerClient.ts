@@ -16,9 +16,9 @@ export interface PeerClient {
 }
 
 export interface PeerCallbacks {
-    onConnectionOpened: (conn: DataConnection) => void;
-    onConnectionClosed: () => void;
-    onMessageReceived: (message: ProtocolMessage) => void;
+    onConnectionOpened: (peer: Peer, conn: DataConnection) => void;
+    onConnectionClosed: (peer: Peer) => void;
+    onMessageReceived: (peer: Peer, message: ProtocolMessage) => void;
 }
 
 // The peer client context
@@ -50,12 +50,12 @@ export function usePeerClient(callbacks: PeerCallbacks): PeerClient {
                 console.warn("peerId is null before sending hello message")
                 return;
             }
-            callbacksRef.current.onConnectionOpened(conn);
+            callbacksRef.current.onConnectionOpened(p, conn);
         });
 
         conn.on('data', function (data) {
             if (isProtocolMessage(data)) {
-                callbacksRef.current.onMessageReceived(data);
+                callbacksRef.current.onMessageReceived(p, data);
             } else {
                 console.warn(`Received unknown message type ${typeof data}`);
             }
@@ -65,7 +65,12 @@ export function usePeerClient(callbacks: PeerCallbacks): PeerClient {
             console.log("Connection closed inner")
             setIsConnected(false);
             setIsConnecting(false);
-            callbacksRef.current.onConnectionClosed();
+            callbacksRef.current.onConnectionClosed(p);
+        });
+
+        conn.on('error', function (err) {
+            console.log("Connection error inner")
+            console.error(err);
         });
     }
 
@@ -89,6 +94,13 @@ export function usePeerClient(callbacks: PeerCallbacks): PeerClient {
             registerConnection(newPeer, conn);
         });
 
+        newPeer.on('disconnected', function () {
+            console.log("Peer disconnected")
+            setIsConnected(false);
+            setIsConnecting(false);
+
+        });
+
         peer.current = newPeer;
 
         return () => {
@@ -97,7 +109,7 @@ export function usePeerClient(callbacks: PeerCallbacks): PeerClient {
             setIsConnecting(false);
             newPeer.disconnect();
             newPeer.destroy();
-            callbacksRef.current.onConnectionClosed();
+            callbacksRef.current.onConnectionClosed(newPeer);
         };
     }, []);
 
@@ -106,10 +118,26 @@ export function usePeerClient(callbacks: PeerCallbacks): PeerClient {
         console.warn("Destroying peer")
         setIsConnected(false);
         setIsConnecting(false);
-        peer.current?.disconnect();
-        peer.current?.destroy();
-        callbacksRef.current.onConnectionClosed();
+        if (!peer.current) {
+            console.warn("Nothing to destroy")
+            return;
+        }
+        peer.current.disconnect();
+        peer.current.destroy();
+        callbacksRef.current.onConnectionClosed(peer.current);
     });
+
+    // every second, print peer
+    // useEffect(() => {
+    //     const interval = setInterval(() => {
+    //         if (!peer.current) {
+    //             console.warn("Peer not initialized")
+    //             return;
+    //         }
+    //         console.log(peer.current)
+    //     }, 1000);
+    //     return () => clearInterval(interval);
+    // });
 
     const connectTo = function (id: string) {
         console.log(`Connecting to ${id}`);

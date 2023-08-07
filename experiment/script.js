@@ -10,6 +10,8 @@ const conn1 = document.querySelector('#conn1');
 const conn2 = document.querySelector('#conn2');
 const disconnect = document.querySelector('#disconnect');
 
+const en1 = document.querySelector('#en1');
+
 var send = true;
 var peer = new Peer();
 var connection;
@@ -33,7 +35,20 @@ peer.on('connection', function (conn) {
 
 // On conn2, connect to peer from conn1 field
 conn2.addEventListener('click', () => {
-    var conn = peer.connect(conn1.value);
+    const text = conn1.value;
+
+    // if text is in form http://localhost:3000/?id=bd5cf31f-007c-4673-818e-1111b4c2bd09, extract id
+    const url = new URL(text);
+    const id_extracted = url.searchParams.get("id");
+
+    // if id is null, assume text is id
+    let id = text;
+    if (id_extracted) {
+        id = id_extracted;
+    }
+
+    console.log(`Trying to connect: ${id}`)
+    var conn = peer.connect(id);
     conn.on('data', onData);
     conn.on('open', function () {
         console.log("New conn. Sending")
@@ -92,3 +107,26 @@ b4.addEventListener('click', function () {
         }
     });
 });
+
+// close connection on window close
+window.addEventListener('beforeunload', function () {
+
+    // if en1 is not checked, just shutdown
+    if (!en1.checked) {
+        return;
+    }
+
+    // send bye message
+    connection.send({
+        messageType: 'bye',
+    });
+
+    if (connection) {
+        connection.close();
+    }
+
+    peer.destroy();
+});
+
+// check the checkbox on js start
+en1.checked = true;
