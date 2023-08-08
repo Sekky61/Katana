@@ -1,10 +1,12 @@
 // The protocol between two peers
 
-export type ProtocolMessage = {
+export type ProtocolMessage = HelloMessage | OfferMessage | AcceptMessage | UnOfferMessage | FileContentMessage;
+
+export type ProtocolMessagebase = {
   messageType: string
 };
 
-export interface HelloMessage extends ProtocolMessage {
+export interface HelloMessage extends ProtocolMessagebase {
   messageType: 'hello',
   id: string,
 }
@@ -14,20 +16,26 @@ export interface FileInfo {
   size: number,
 }
 
-export interface OfferMessage extends ProtocolMessage {
+export interface OfferMessage extends ProtocolMessagebase {
   messageType: 'offer',
   offeredFile: FileInfo,
 }
 
-export interface UnOfferMessage extends ProtocolMessage {
+export interface UnOfferMessage extends ProtocolMessagebase {
   messageType: 'unoffer',
   unOfferedFile: FileInfo,
 }
 
-export interface AcceptMessage extends ProtocolMessage {
+export interface AcceptMessage extends ProtocolMessagebase {
   messageType: 'accept',
   // Names of files that are accepted
   acceptedFiles: string[],
+}
+
+export interface FileContentMessage extends ProtocolMessagebase {
+  messageType: 'fileContent',
+  fileInfo: FileInfo,
+  content: ArrayBuffer,
 }
 
 export function createHelloMessage(id: string): HelloMessage {
@@ -38,7 +46,7 @@ export function createHelloMessage(id: string): HelloMessage {
 }
 
 export function isProtocolMessage(message: any): message is ProtocolMessage {
-  return isHelloMessage(message) || isOfferMessage(message) || isAcceptMessage(message);
+  return isHelloMessage(message) || isOfferMessage(message) || isAcceptMessage(message) || isUnOfferMessage(message) || isFileContentMessage(message);
 }
 
 export function isHelloMessage(message: any): message is HelloMessage {
@@ -51,5 +59,13 @@ export function isOfferMessage(message: any): message is OfferMessage {
 
 export function isAcceptMessage(message: any): message is AcceptMessage {
   return message.messageType === 'accept';
+}
+
+export function isUnOfferMessage(message: any): message is UnOfferMessage {
+  return message.messageType === 'unoffer';
+}
+
+export function isFileContentMessage(message: any): message is FileContentMessage {
+  return message.messageType === 'fileContent';
 }
 

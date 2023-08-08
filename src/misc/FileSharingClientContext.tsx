@@ -21,6 +21,7 @@ const defaultFileSharingClient = {
   offeredFiles: new Map<string, OfferedFile>(),
   offerFile: (file: File) => { },
   unOfferFile: (file: FileInfo) => { },
+  acceptFiles: (fileInfos: FileInfo[]) => { },
 };
 
 export const FileSharingClientContext = createContext<FileSharingClient>(defaultFileSharingClient);

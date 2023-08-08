@@ -14,3 +14,15 @@ export function fileToFileInfo(file: File): FileInfo {
     size: file.size,
   };
 }
+
+export function saveArrayBuffer(arrayBuffer: ArrayBuffer, fileName: string) {
+  const a = document.createElement("a");
+  a.style.display = "none";
+  document.body.appendChild(a);
+  const url = window.URL.createObjectURL(new Blob([arrayBuffer]));
+  a.href = url;
+  a.download = fileName;
+  a.click();
+  window.URL.revokeObjectURL(url);
+  document.body.removeChild(a);
+}

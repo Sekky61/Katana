@@ -2,32 +2,39 @@ import { ChangeEvent, useState } from "react";
 import { FileInfo } from "../misc/Protocol";
 import { useFileSharingClientContext } from "../misc/FileSharingClientContext";
 import prettyBytes from "pretty-bytes";
+import { useSet } from "../hooks/useSet";
 
 // Files available to download will be listed here
 export default function ReceiveBubble() {
 
-  const { offeredFiles } = useFileSharingClientContext();
-  const [pickedIndexes, setPickedIndexes] = useState<number[]>([]);
+  const { offeredFiles, acceptFiles } = useFileSharingClientContext();
+  const [pickedFiles, pickedFilesActions] = useSet<string>();
 
   const nOfFiles = offeredFiles.size;
-  const nOfPickedFiles = pickedIndexes.length;
+  const nOfPickedFiles = pickedFiles.size;
 
-  const isChecked = (index: number) => {
-    return pickedIndexes.includes(index);
+  const isChecked = (fileName: string) => {
+    return pickedFiles.has(fileName);
   }
 
-  const selectFile = (index: number, check: boolean) => {
+  const selectFile = (file: string, check: boolean) => {
     if (check) {
-      // if it's not already in the list, add it
-      if (!pickedIndexes.includes(index)) {
-        setPickedIndexes([...pickedIndexes, index]);
-      }
+      pickedFilesActions.add(file);
     } else {
-      setPickedIndexes(pickedIndexes.filter((i) => i !== index));
+      pickedFilesActions.remove(file);
     }
   }
 
-  const handleDownload = () => {
+  const downloadSelectedFiles = () => {
+    const pickedFileInfos = [...pickedFiles].map(fileName => {
+      const fileInfo = offeredFiles.get(fileName);
+      if (!fileInfo) {
+        throw new Error(`File ${fileName} not found in offered files`);
+      }
+      return fileInfo.fileInfo;
+    });
+
+    acceptFiles(pickedFileInfos);
   }
 
   return (
@@ -39,14 +46,14 @@ export default function ReceiveBubble() {
       <div>
         <ul className="flex flex-col divide-y-2 border-y-2 border-white divide-white">
           {[...offeredFiles.values()].map((offeredFile, index) => {
-            return <FileListing key={index} isChecked={isChecked(index)} file={offeredFile.fileInfo} onCheck={(checked) => {
-              selectFile(index, checked);
+            return <FileListing key={index} isChecked={isChecked(offeredFile.fileInfo.name)} file={offeredFile.fileInfo} onCheck={(checked) => {
+              selectFile(offeredFile.fileInfo.name, checked);
             }} />
           })}
         </ul>
       </div>
       <div className="flex items-center gap-2 mt-2">
-        <button onClick={handleDownload} className="button">Download</button>
+        <button onClick={downloadSelectedFiles} className="button">Download</button>
         <p>(selected {nOfPickedFiles} / {nOfFiles} files)</p>
       </div>
       <div className="w-8 h-8"></div>

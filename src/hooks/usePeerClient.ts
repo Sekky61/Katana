@@ -57,7 +57,8 @@ export function usePeerClient(callbacks: PeerCallbacks): PeerClient {
       if (isProtocolMessage(data)) {
         callbacksRef.current.onMessageReceived(p, data);
       } else {
-        console.warn(`Received unknown message type ${typeof data}`);
+        console.warn(`Received unknown message type ${typeof data}. The message is:`);
+        console.dir(data);
       }
     });
 

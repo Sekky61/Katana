@@ -2,11 +2,11 @@
 //
 // Business logic for file sharing
 
-import { FileInfo, OfferMessage, ProtocolMessage, UnOfferMessage, createHelloMessage, isOfferMessage } from '../misc/Protocol';
+import { AcceptMessage, FileContentMessage, FileInfo, OfferMessage, ProtocolMessage, UnOfferMessage, createHelloMessage, isFileContentMessage, isOfferMessage, isUnOfferMessage } from '../misc/Protocol';
 import { PeerClient, usePeerClient } from './usePeerClient';
 import { MyMap, useMap } from './useMap';
 import Peer, { DataConnection } from 'peerjs';
-import { fileToFileInfo } from '../misc/misc';
+import { fileToFileInfo, saveArrayBuffer } from '../misc/misc';
 
 export interface MyOfferedFile {
   file: File,
@@ -26,6 +26,7 @@ export interface FileSharingClient {
   offeredFiles: MyMap<string, OfferedFile>;
   offerFile: (file: File) => void;
   unOfferFile: (file: FileInfo) => void;
+  acceptFiles: (files: FileInfo[]) => void;
 }
 
 export function useFileSharingClient(): FileSharingClient {
@@ -49,14 +50,46 @@ export function useFileSharingClient(): FileSharingClient {
   const onMessageReceived = (peer: Peer, message: ProtocolMessage) => {
     console.log("Message received FROM CALLBACK");
     console.dir(message)
-    if (isOfferMessage(message)) {
-      const offeredFile: OfferedFile = {
-        fileInfo: message.offeredFile,
-        downloadStatus: { isDownloading: false, progress: 0 },
-      };
-      offeredFilesActions.set(message.offeredFile.name, offeredFile);
-    } else {
-      console.warn(`Unhandled message type ${typeof message}`);
+
+    switch (message.messageType) {
+      case 'hello':
+        break;
+      case 'offer':
+        const offeredFile: OfferedFile = {
+          fileInfo: message.offeredFile,
+          downloadStatus: { isDownloading: false, progress: 0 },
+        };
+        offeredFilesActions.set(message.offeredFile.name, offeredFile);
+        break;
+      case 'unoffer':
+        offeredFilesActions.remove(message.unOfferedFile.name);
+        break;
+      case 'accept':
+        // Send back the files
+        const files = [...myOfferedFiles.values()].filter(f => message.acceptedFiles.includes(f.fileInfo.name));
+        files.forEach(f => {
+          const reader = new FileReader();
+          reader.onload = () => {
+            const fileContentMessage: FileContentMessage = {
+              messageType: 'fileContent',
+              fileInfo: f.fileInfo,
+              content: reader.result as ArrayBuffer,
+            };
+            console.log("(accept) Sending", fileContentMessage);
+            client.sendMessage(fileContentMessage);
+          };
+          reader.readAsArrayBuffer(f.file);
+        });
+        break;
+      case 'fileContent':
+        // save the blob to the file
+        const { content } = message;
+        const { name } = message.fileInfo;
+        // TODO: protect against downloading unsolicited files
+        saveArrayBuffer(content, name);
+        break;
+      default:
+        console.warn(`Unhandled message type ${typeof message}`);
     }
   };
 
@@ -90,5 +123,13 @@ export function useFileSharingClient(): FileSharingClient {
     myOfferedFilesActions.remove(file.name);
   }
 
-  return { client, myOfferedFiles, offeredFiles, offerFile, unOfferFile };
+  const acceptFiles = (files: FileInfo[]) => {
+    const acceptMessage: AcceptMessage = {
+      messageType: 'accept',
+      acceptedFiles: files.map(f => f.name),
+    };
+    client.sendMessage(acceptMessage);
+  }
+
+  return { client, myOfferedFiles, offeredFiles, offerFile, unOfferFile, acceptFiles };
 }
