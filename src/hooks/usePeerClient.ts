@@ -2,7 +2,7 @@
 
 import { useState, useEffect, useRef } from 'react';
 import Peer, { DataConnection } from 'peerjs';
-import { ProtocolMessage, isProtocolMessage } from '../misc/Protocol';
+import { Protocol, isProtocolMessage } from '../misc/Protocol';
 import useUnload from './useUnload';
 
 export interface PeerClient {
@@ -12,13 +12,13 @@ export interface PeerClient {
   isConnected: boolean;
   // Connect to another peer
   connectTo: (id: string) => void;
-  sendMessage: (message: ProtocolMessage) => void;
+  sendMessage: (message: Protocol) => void;
 }
 
 export interface PeerCallbacks {
   onConnectionOpened: (peer: Peer, conn: DataConnection) => void;
   onConnectionClosed: (peer: Peer) => void;
-  onMessageReceived: (peer: Peer, message: ProtocolMessage) => void;
+  onMessageReceived: (peer: Peer, message: Protocol) => void;
 }
 
 // The peer client context

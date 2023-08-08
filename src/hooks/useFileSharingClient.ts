@@ -2,11 +2,12 @@
 //
 // Business logic for file sharing
 
-import { AcceptMessage, FileContentMessage, FileInfo, OfferMessage, ProtocolMessage, UnOfferMessage, createHelloMessage, isFileContentMessage, isOfferMessage, isUnOfferMessage } from '../misc/Protocol';
+import { Protocol, ProtocolMsg, createHelloMessage } from '../misc/Protocol';
 import { PeerClient, usePeerClient } from './usePeerClient';
 import { MyMap, useMap } from './useMap';
 import Peer, { DataConnection } from 'peerjs';
 import { fileToFileInfo, saveArrayBuffer } from '../misc/misc';
+import { FileInfo } from '../misc/fileTypes';
 
 export interface MyOfferedFile {
   file: File,
@@ -47,7 +48,7 @@ export function useFileSharingClient(): FileSharingClient {
     offeredFilesActions.reset();
   };
 
-  const onMessageReceived = (peer: Peer, message: ProtocolMessage) => {
+  const onMessageReceived = (peer: Peer, message: Protocol) => {
     console.log("Message received FROM CALLBACK");
     console.dir(message)
 
@@ -70,7 +71,7 @@ export function useFileSharingClient(): FileSharingClient {
         files.forEach(f => {
           const reader = new FileReader();
           reader.onload = () => {
-            const fileContentMessage: FileContentMessage = {
+            const fileContentMessage: ProtocolMsg.FileContent = {
               messageType: 'fileContent',
               fileInfo: f.fileInfo,
               content: reader.result as ArrayBuffer,
@@ -105,7 +106,7 @@ export function useFileSharingClient(): FileSharingClient {
       file: file,
       fileInfo: fileInfo,
     };
-    const offerMessage: OfferMessage = {
+    const offerMessage: ProtocolMsg.Offer = {
       messageType: 'offer',
       offeredFile: fileInfo,
     };
@@ -115,7 +116,7 @@ export function useFileSharingClient(): FileSharingClient {
   };
 
   const unOfferFile = (file: FileInfo) => {
-    const unOfferMessage: UnOfferMessage = {
+    const unOfferMessage: ProtocolMsg.UnOffer = {
       messageType: 'unoffer',
       unOfferedFile: file,
     };
@@ -124,7 +125,7 @@ export function useFileSharingClient(): FileSharingClient {
   }
 
   const acceptFiles = (files: FileInfo[]) => {
-    const acceptMessage: AcceptMessage = {
+    const acceptMessage: ProtocolMsg.Accept = {
       messageType: 'accept',
       acceptedFiles: files.map(f => f.name),
     };

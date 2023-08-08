@@ -43,7 +43,7 @@ function ShareLink() {
 // Allow user to copy the link to join the session
 // Displays the status of the connection
 export default function ConnectionWindow() {
-  const { client: { isConnected, peerId } } = useFileSharingClientContext();
+  const { client: { isConnected } } = useFileSharingClientContext();
 
   return (
     <div className='bg-orange-300 rounded px-4 py-1'>

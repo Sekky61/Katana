@@ -1,6 +1,6 @@
 // Utility functions without a better place
 
-import { FileInfo } from "./Protocol";
+import { FileInfo } from "./fileTypes";
 
 // Read the user id from the url parameters
 export function readUserIDFromParams(): string | null {

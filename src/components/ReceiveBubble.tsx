@@ -1,5 +1,5 @@
-import { ChangeEvent, useState } from "react";
-import { FileInfo } from "../misc/Protocol";
+import { ChangeEvent } from "react";
+import { FileInfo } from "../misc/fileTypes";
 import { useFileSharingClientContext } from "../misc/FileSharingClientContext";
 import prettyBytes from "pretty-bytes";
 import { useSet } from "../hooks/useSet";

@@ -4,8 +4,8 @@
 
 import { createContext, useContext } from 'react';
 import { PeerClient } from '../hooks/usePeerClient';
-import { FileInfo } from './Protocol';
 import { FileSharingClient, MyOfferedFile, OfferedFile, useFileSharingClient } from '../hooks/useFileSharingClient';
+import { FileInfo } from './fileTypes';
 
 const defaultClient: PeerClient = {
   peerId: null,

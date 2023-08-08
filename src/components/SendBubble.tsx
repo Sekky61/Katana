@@ -1,4 +1,4 @@
-import { FileInfo } from "../misc/Protocol";
+import { FileInfo } from "../misc/fileTypes";
 import { ChangeEvent } from "react";
 import { useFileSharingClientContext } from "../misc/FileSharingClientContext";
 import { MyOfferedFile } from "../hooks/useFileSharingClient";
