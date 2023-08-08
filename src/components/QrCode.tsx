@@ -4,12 +4,13 @@ import QRCode from 'qrcode';
 // A QR code component
 //
 // It generates a QR code from the given link
-export function QrCode({ link }: { link: string }) {
+export function QrCode({ link }: { link: string | null }) {
 
   const [qr, setQr] = useState<string | null>(null);
 
   useEffect(() => {
     async function generateQr() {
+      if (!link) return;
       const r = await QRCode.toDataURL(link, { margin: 2 });
       setQr(r);
     }
@@ -17,7 +18,7 @@ export function QrCode({ link }: { link: string }) {
     generateQr();
   }, [link]);
 
-  if (!qr) return (<div>Loading...</div>);
+  if (!qr) return null;
 
   return (
     <img src={qr} alt="QR code" />

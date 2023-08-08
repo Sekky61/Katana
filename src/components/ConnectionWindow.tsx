@@ -13,27 +13,27 @@ function getShareLink(peerId: string) {
 
 function ShareLink() {
   const { client: { peerId } } = useFileSharingClientContext();
-
-  if (!peerId) {
-    return (
-      <div className="bg-white rounded">
-        <div className="flex justify-center">
-          <Spinner></Spinner>
-        </div>
-      </div>
-    )
-  }
-
-  const link = getShareLink(peerId);
+  const link = peerId ? getShareLink(peerId) : null;
+  const qr = <QrCode link={link}></QrCode>;
+  const showLoading = !peerId || !qr;
 
   return (
-    <div className="bg-white rounded ">
-      <div className="flex justify-center">
-        <QrCode link={link}></QrCode>
-      </div>
-      <div className="flex justify-center pb-1">
-        <CopyLinkButton link={link}></CopyLinkButton>
-      </div>
+    <div className="bg-white rounded w-44 h-52">
+      {
+        showLoading ?
+          <div className="flex justify-center items-center h-full">
+            <Spinner></Spinner>
+          </div>
+          :
+          <div className="flex flex-col justify-between items-center">
+            <div>
+              {qr}
+            </div>
+            <div className="p-2">
+              <CopyLinkButton link={link || ""}></CopyLinkButton>
+            </div>
+          </div>
+      }
     </div>
   );
 }
@@ -57,13 +57,17 @@ export default function ConnectionWindow() {
         </div>
         <div className="bg-orange-400 p-2 rounded w-48 flex flex-col">
           <h2 className="text-xl">The other</h2>
-          <div className="flex justify-center items-center p-4 flex-grow">
-            {isConnected ?
-              <p>Connected</p> :
-              <Spinner></Spinner>
-            }
-          </div>
-          <p>Wait for the other side to connect to you</p>
+          {isConnected ?
+            <div className="flex justify-center items-center p-4 flex-grow">
+              <p>Connected</p>
+            </div> :
+            <div className="flex flex-col justify-center items-center flex-grow">
+              <div className="flex-grow flex flex-col justify-center">
+                <Spinner></Spinner>
+              </div>
+              <p>Wait for the other side to connect to you</p>
+            </div>
+          }
         </div>
       </div>
       <p className="py-2">Share the ID with the other computer to make a connection. Keep this a secret, everybody who knows your ID can send you files.</p>
