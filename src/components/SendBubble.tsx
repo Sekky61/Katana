@@ -25,16 +25,14 @@ export default function SendBubble() {
   }
 
   return (
-    <div className="bg-orange-300 rounded flex-grow">
-      <div className="p-1">
-        <h2 className="text-xl">Share files</h2>
-        <div className="flex items-center gap-2 my-3">
-          <label htmlFor="multiple_files" className="button">Add multiple files</label>
-          <input id="multiple_files" type="file" multiple onChange={handleFileChange} className="hidden"></input>
-          <span> or drag and drop</span>
-        </div>
+    <div className="card card-padding flex-grow">
+      <h2 className="text-xl">Share files</h2>
+      <div className="flex items-center gap-2 my-3">
+        <label htmlFor="multiple_files" className="button">Add multiple files</label>
+        <input id="multiple_files" type="file" multiple onChange={handleFileChange} className="hidden"></input>
+        <span> or drag and drop</span>
       </div>
-      <ul className="flex flex-col divide-y-2 border-y-2 border-white divide-white">
+      <ul className="flex flex-col divide-y border-y border-equator-400 divide-equator-400">
         {[...myOfferedFiles.values()].map((file, index) => {
           return <FileListing key={index} file={file} handleRemove={removeOfferedFile} />
         })}
@@ -65,8 +63,8 @@ function FileListing({ file, handleRemove }: FileListingProps) {
 
 function CloseIcon() {
   return (
-    <div className="bg-orange-600 hover:bg-orange-700 p-1 rounded-sm">
-      <svg className="w-4 h-4 text-gray-800 dark:text-white" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 14 14">
+    <div className="bg-equator-500 hover:bg-equator-600 active:bg-equator-700 p-1 rounded-sm">
+      <svg className="w-4 h-4 text-white" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 14 14">
         <path stroke="currentColor" strokeLinecap="round" strokeLinejoin="round" strokeWidth="1.9" d="m1 1 6 6m0 0 6 6M7 7l6-6M7 7l-6 6" />
       </svg>
     </div>

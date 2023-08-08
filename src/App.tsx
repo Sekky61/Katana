@@ -22,12 +22,12 @@ function Page() {
 
   return (
     <div className="container mx-auto px-4 mt-20">
-      <h1 className='text-4xl mb-10'>Katana - a File sender</h1>
-
-      <div className="mb-1">
+      <h1 className='text-4xl mb-2'>Katana — a File sender</h1>
+      <p className="mb-4">Share the ID with the other computer to make a connection. Keep this a secret, everybody who knows your ID can send you files.</p>
+      <div className="mb-4">
         <ConnectionWindow></ConnectionWindow>
       </div>
-      <div className="grid grid-cols-2 gap-1">
+      <div className="grid grid-cols-2 gap-4">
         <SendBubble />
         <ReceiveBubble />
       </div>

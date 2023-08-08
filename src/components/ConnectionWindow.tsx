@@ -18,18 +18,18 @@ function ShareLink() {
   const showLoading = !peerId || !qr;
 
   return (
-    <div className="bg-white rounded w-44 h-52">
+    <div className="bg-white rounded w-[176px]">
       {
         showLoading ?
           <div className="flex justify-center items-center h-full">
             <Spinner></Spinner>
           </div>
           :
-          <div className="flex flex-col justify-between items-center">
-            <div>
+          <div className="flex flex-col justify-between items-center h-full">
+            <div className="w-[176px] rounded overflow-hidden">
               {qr}
             </div>
-            <div className="p-2">
+            <div className="w-full border-t flex items-center justify-center">
               <CopyLinkButton link={link || ""}></CopyLinkButton>
             </div>
           </div>
@@ -46,17 +46,17 @@ export default function ConnectionWindow() {
   const { client: { isConnected } } = useFileSharingClientContext();
 
   return (
-    <div className='bg-orange-300 rounded px-4 py-1'>
+    <div className=' card-padding'>
       <div className="flex justify-center gap-2">
-        <div className="bg-orange-400 p-2 rounded w-48">
-          <h2 className="text-xl">You</h2>
+        <div className="full-card w-52">
+          <h2 className="text-xl mb-1">You</h2>
           <ShareLink></ShareLink>
         </div>
         <div className="flex items-center">
           <span className="text-4xl p-2">...</span>
         </div>
-        <div className="bg-orange-400 p-2 rounded w-48 flex flex-col">
-          <h2 className="text-xl">The other</h2>
+        <div className="full-card w-52 flex flex-col">
+          <h2 className="text-xl mb-1">The other</h2>
           {isConnected ?
             <div className="flex justify-center items-center p-4 flex-grow">
               <p>Connected</p>
@@ -65,12 +65,11 @@ export default function ConnectionWindow() {
               <div className="flex-grow flex flex-col justify-center">
                 <Spinner></Spinner>
               </div>
-              <p>Wait for the other side to connect to you</p>
+              <p className="text-center">Wait for the other side to connect to you</p>
             </div>
           }
         </div>
       </div>
-      <p className="py-2">Share the ID with the other computer to make a connection. Keep this a secret, everybody who knows your ID can send you files.</p>
     </div>
   )
 }
@@ -78,7 +77,7 @@ export default function ConnectionWindow() {
 function Spinner() {
   return (
     <div role="status">
-      <svg aria-hidden="true" className="w-8 h-8 mr-2 text-gray-200 animate-spin animation-duration-2000 fill-orange-600" viewBox="0 0 100 101" fill="none" xmlns="http://www.w3.org/2000/svg">
+      <svg aria-hidden="true" className="w-8 h-8 mr-2 text-equator-50 animate-spin animation-duration-2000 fill-equator-700" viewBox="0 0 100 101" fill="none" xmlns="http://www.w3.org/2000/svg">
         <path d="M100 50.5908C100 78.2051 77.6142 100.591 50 100.591C22.3858 100.591 0 78.2051 0 50.5908C0 22.9766 22.3858 0.59082 50 0.59082C77.6142 0.59082 100 22.9766 100 50.5908ZM9.08144 50.5908C9.08144 73.1895 27.4013 91.5094 50 91.5094C72.5987 91.5094 90.9186 73.1895 90.9186 50.5908C90.9186 27.9921 72.5987 9.67226 50 9.67226C27.4013 9.67226 9.08144 27.9921 9.08144 50.5908Z" fill="currentColor" />
         <path d="M93.9676 39.0409C96.393 38.4038 97.8624 35.9116 97.0079 33.5539C95.2932 28.8227 92.871 24.3692 89.8167 20.348C85.8452 15.1192 80.8826 10.7238 75.2124 7.41289C69.5422 4.10194 63.2754 1.94025 56.7698 1.05124C51.7666 0.367541 46.6976 0.446843 41.7345 1.27873C39.2613 1.69328 37.813 4.19778 38.4501 6.62326C39.0873 9.04874 41.5694 10.4717 44.0505 10.1071C47.8511 9.54855 51.7191 9.52689 55.5402 10.0491C60.8642 10.7766 65.9928 12.5457 70.6331 15.2552C75.2735 17.9648 79.3347 21.5619 82.5849 25.841C84.9175 28.9121 86.7997 32.2913 88.1811 35.8758C89.083 38.2158 91.5421 39.6781 93.9676 39.0409Z" fill="currentFill" />
       </svg>
@@ -103,10 +102,15 @@ function CopyLinkButton({ link }: { link: string }) {
   };
 
   return (
-    <button onClick={copyText} className="relative group flex items-center rounded px-1.5 py-0.5 border bg-orange-200 hover:bg-orange-500 hover:text-white active:bg-orange-700">
-      <LinkIcon></LinkIcon>
-      <span className="text-md">Copy Link</span>
-      <span className="absolute bottom-full -left-8 bg-white text-black rounded drop-shadow border p-1 mb-2 hidden group-hover:block">{link}</span>
-    </button>
+    <div className="relative group w-full">
+      <button onClick={copyText} className="flex justify-center items-center rounded-b-lg px-4 py-2 w-full group-hover:bg-equator-50 active:!bg-equator-100">
+        <LinkIcon></LinkIcon>
+        <span className="text-md">Copy Link</span>
+      </button>
+      <div className="hidden group-hover:block absolute bottom-full left-0 right-0 -mx-14">
+        <div className="card text-black p-2 drop-shadow">{link}</div>
+        <div className="w-full h-2"></div>
+      </div>
+    </div>
   );
 }
