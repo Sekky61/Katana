@@ -40,6 +40,16 @@ export function useFileSharingClient(): FileSharingClient {
 
     const helloMessage = createHelloMessage(peer.id);
     conn.send(helloMessage);
+
+    // Send offered files
+    for (const file of myOfferedFiles.values()) {
+      const offerMessage: ProtocolMsg.Offer = {
+        messageType: 'offer',
+        offeredFile: file.fileInfo,
+      };
+      console.log("OFFER FILE", offerMessage)
+      conn.send(offerMessage);
+    }
   };
 
   const onConnectionClosed = (peer: Peer) => {

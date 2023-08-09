@@ -1,6 +1,7 @@
 // Display information about yourself and the peer
 
 import { useFileSharingClientContext } from "../misc/FileSharingClientContext";
+import { CheckCircle } from "../misc/icons/CheckCircle";
 import { LinkIcon } from "../misc/icons/LinkIcon";
 import { QrCode } from "./QrCode";
 import { Spinner } from "./Spinner";
@@ -55,13 +56,14 @@ export default function ConnectionWindow() {
           <ShareLink></ShareLink>
         </div>
         <div className="flex items-center">
-          <span className="text-4xl p-2">...</span>
+          <span className="text-4xl p-3">...</span>
         </div>
         <div className="full-card w-52 flex flex-col">
           <h2 className="text-xl mb-1">The other</h2>
           {isConnected ?
-            <div className="flex justify-center items-center p-4 flex-grow">
-              <p>Connected</p>
+            <div className="flex flex-col justify-center items-center p-4 flex-grow">
+              <CheckCircle></CheckCircle>
+              <p className="text-lg">Connected</p>
             </div> :
             <div className="flex flex-col justify-center items-center flex-grow">
               <div className="flex-grow flex flex-col justify-center">
@@ -88,7 +90,10 @@ function CopyLinkButton({ link }: { link: string }) {
         <span className="text-md">Copy Link</span>
       </button>
       <div className="hidden group-hover:block absolute bottom-full left-0 right-0 -mx-14">
-        <div className="card text-black p-2 drop-shadow">{link}</div>
+        <div className="card text-black p-2 drop-shadow text-center">
+          <div>{link}</div>
+          <div className="mt-2">Share this link with your buddy</div>
+        </div>
         <div className="w-full h-2"></div>
       </div>
     </div>

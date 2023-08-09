@@ -27,18 +27,17 @@ export default function SendBubble() {
 
   return (
     <div className="card card-padding flex-grow">
-      <h2 className="text-xl">Share files</h2>
-      <div className="flex items-center gap-2 my-3">
-        <label htmlFor="multiple_files" className="button">Add multiple files</label>
-        <input id="multiple_files" type="file" multiple onChange={handleFileChange} className="hidden"></input>
-        <span> or drag and drop</span>
-      </div>
+      <h2 className="text-xl pb-4">Shared files</h2>
       <ul className="flex flex-col divide-y border-y border-equator-400 divide-equator-400">
         {[...myOfferedFiles.values()].map((file, index) => {
           return <FileListing key={index} file={file} handleRemove={removeOfferedFile} />
         })}
       </ul>
-      <div className="w-8 h-8"></div>
+      <div className="flex items-center gap-2 pt-4">
+        <label htmlFor="multiple_files" className="button">Add multiple files</label>
+        <input id="multiple_files" type="file" multiple onChange={handleFileChange} className="hidden"></input>
+        <span> or drag and drop</span>
+      </div>
     </div>
   );
 }
@@ -54,7 +53,7 @@ function FileListing({ file, handleRemove }: FileListingProps) {
   const prettySize = prettyBytes(fileInfo.size);
 
   return (
-    <li className="flex items-center px-1 gap-3 py-1">
+    <li className="flex items-center px-1 gap-3 py-1.5 hover:bg-equator-100">
       <div className="flex-grow truncate">{fileInfo.name}</div>
       <div className="whitespace-nowrap text-sm">{prettySize}</div>
       <button onClick={() => handleRemove(fileInfo)} className=""><CloseIcon></CloseIcon></button>
