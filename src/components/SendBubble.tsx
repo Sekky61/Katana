@@ -3,6 +3,7 @@ import { ChangeEvent } from "react";
 import { useFileSharingClientContext } from "../misc/FileSharingClientContext";
 import { MyOfferedFile } from "../hooks/useFileSharingClient";
 import prettyBytes from "pretty-bytes";
+import { CloseIcon } from "../misc/icons/CloseIcon";
 
 // Provide interface to add files to share
 export default function SendBubble() {
@@ -59,14 +60,4 @@ function FileListing({ file, handleRemove }: FileListingProps) {
       <button onClick={() => handleRemove(fileInfo)} className=""><CloseIcon></CloseIcon></button>
     </li>
   );
-}
-
-function CloseIcon() {
-  return (
-    <div className="bg-equator-500 hover:bg-equator-600 active:bg-equator-700 p-1 rounded-sm">
-      <svg className="w-4 h-4 text-white" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 14 14">
-        <path stroke="currentColor" strokeLinecap="round" strokeLinejoin="round" strokeWidth="1.9" d="m1 1 6 6m0 0 6 6M7 7l6-6M7 7l-6 6" />
-      </svg>
-    </div>
-  )
 }

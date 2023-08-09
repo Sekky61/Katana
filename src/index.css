@@ -39,3 +39,7 @@ body {
 .bb {
   @apply py-3 px-6 rounded-lg text-white
 }
+
+.link {
+  @apply hover:cursor-pointer text-equator-900 hover:text-equator-950
+}
