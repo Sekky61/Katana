@@ -26,6 +26,6 @@ export function QrCode({ link }: { link: string | null }) {
   if (!qr) return null;
 
   return (
-    <img src={qr} alt="QR code" />
+    <img className="w-[176px] h-[176px]" src={qr} alt="QR code" />
   );
 }

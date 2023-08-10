@@ -20,11 +20,13 @@ function ShareLink() {
   const qr = <QrCode link={link}></QrCode>;
   const showLoading = !peerId || !qr;
 
+  // The placeholder is 176 + 36 = 212px
+
   return (
     <div className="bg-white rounded w-[176px]">
       {
         showLoading ?
-          <div className="flex justify-center items-center h-full">
+          <div className="flex justify-center items-center w-[176px] h-[212px]">
             <Spinner></Spinner>
           </div>
           :
@@ -84,7 +86,7 @@ function CopyLinkButton({ link }: { link: string }) {
   };
 
   return (
-    <div className="relative group w-full">
+    <div className="relative group w-full h-9">
       <button onClick={copyText} className="flex justify-center items-center rounded-b-lg px-4 py-2 w-full group-hover:bg-equator-50 active:!bg-equator-100">
         <LinkIcon></LinkIcon>
         <span className="text-md">Copy Link</span>
