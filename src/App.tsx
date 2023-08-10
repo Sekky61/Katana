@@ -25,12 +25,16 @@ function Page() {
   return (
     <div className="flex flex-col min-h-screen">
       <div className="container flex-grow mx-auto px-4 mt-20">
-        <h1 className='text-4xl mb-2'>Katana — a File sender</h1>
+        <div className='flex flex-wrap items-center text-4xl mb-2'>
+          <h1>Katana</h1>
+          <span>&nbsp;—&nbsp;</span>
+          <h2>a File sender</h2>
+        </div>
         <p className="mb-4">Share the ID with the other computer to make a connection. Keep this a secret, everybody who knows your ID can send you files.</p>
         <div className="mb-4">
           <ConnectionWindow></ConnectionWindow>
         </div>
-        <div className="grid grid-cols-2 gap-4">
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
           <SendBubble />
           <ReceiveBubble />
         </div>

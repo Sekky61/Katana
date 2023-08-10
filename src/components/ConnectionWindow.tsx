@@ -50,13 +50,13 @@ export default function ConnectionWindow() {
 
   return (
     <div className=' card-padding'>
-      <div className="flex justify-center gap-2">
+      <div className="flex flex-wrap justify-center gap-2">
         <div className="full-card w-52">
           <h2 className="text-xl mb-1">You</h2>
           <ShareLink></ShareLink>
         </div>
         <div className="flex items-center">
-          <span className="text-4xl p-3">...</span>
+          <span className="hidden sm:block text-4xl p-3">...</span>
         </div>
         <div className="full-card w-52 flex flex-col">
           <h2 className="text-xl mb-1">The other</h2>
