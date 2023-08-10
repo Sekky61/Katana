@@ -26,3 +26,7 @@ export function saveArrayBuffer(arrayBuffer: ArrayBuffer, fileName: string) {
   window.URL.revokeObjectURL(url);
   document.body.removeChild(a);
 }
+
+export function getRandomId(): string {
+  return Math.random().toString(36).slice(2);
+}

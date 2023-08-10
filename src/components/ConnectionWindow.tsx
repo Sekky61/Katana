@@ -31,7 +31,7 @@ function ShareLink() {
           </div>
           :
           <div className="flex flex-col justify-between items-center h-full">
-            <div className="w-[176px] rounded overflow-hidden">
+            <div className="w-[176px] h-[176px] rounded overflow-hidden">
               {qr}
             </div>
             <div className="w-full border-t flex items-center justify-center">

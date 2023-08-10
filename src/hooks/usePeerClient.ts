@@ -4,6 +4,7 @@ import { useState, useEffect, useRef } from 'react';
 import Peer, { DataConnection } from 'peerjs';
 import { Protocol, isProtocolMessage } from '../misc/Protocol';
 import useUnload from './useUnload';
+import { getRandomId } from '../misc/misc';
 
 export interface PeerClient {
   // The peer object
@@ -76,14 +77,16 @@ export function usePeerClient(callbacks: PeerCallbacks): PeerClient {
   }
 
   useEffect(function () {
-    const newPeer = new Peer();
+    // Generate a new peer id
+    const id = getRandomId();
+    setPeerId(id);
+    const newPeer = new Peer(id);
 
     newPeer.on('error', (err) => {
       console.error(err);
     });
 
     newPeer.on('open', (id) => {
-      setPeerId(id);
       setIsConnected(false);
       setIsConnecting(false);
     });
