@@ -1,9 +1,10 @@
 import { FileInfo } from "../misc/fileTypes";
-import { ChangeEvent, useState } from "react";
+import { ChangeEvent, useContext, useState } from "react";
 import { useFileSharingClientContext } from "../misc/FileSharingClientContext";
 import { MyOfferedFile } from "../hooks/useFileSharingClient";
 import prettyBytes from "pretty-bytes";
 import { CloseIcon } from "../misc/icons/CloseIcon";
+import { IsDraggingContext } from "../misc/IsDraggingContext";
 
 // Provide interface to add files to share
 export default function SendBubble() {
@@ -11,6 +12,7 @@ export default function SendBubble() {
   const { myOfferedFiles, offerFile, unOfferFile } = useFileSharingClientContext();
 
   const [isDraggingOver, setIsDraggingOver] = useState(false);
+  const isDraggingGlobal = useContext(IsDraggingContext);
 
   const handleFileChange = (e: ChangeEvent<HTMLInputElement>) => {
     if (!e.target.files) {
@@ -35,9 +37,6 @@ export default function SendBubble() {
   const handleDragLeave = (e: React.DragEvent<HTMLDivElement>) => {
     e.preventDefault();
     const { relatedTarget } = e;
-    console.log("drag leave");
-    console.log("related target", relatedTarget);
-    console.log("current target", e.currentTarget)
     if (!relatedTarget || !e.currentTarget.contains(relatedTarget as Node)) {
       setIsDraggingOver(false);
     }
@@ -46,8 +45,6 @@ export default function SendBubble() {
   const handleDrop = (e: React.DragEvent<HTMLDivElement>) => {
     e.preventDefault();
     setIsDraggingOver(false);
-    console.log("drop");
-    console.log(e)
     if (!e.dataTransfer.files) {
       console.warn("no files dropped");
       return;
@@ -61,8 +58,10 @@ export default function SendBubble() {
   }
 
   const dropFile = (
-    <div className={"absolute inset-0 m-4 bg-equator-50 border border-dashed border-equator-300 " + (isDraggingOver ? "" : "hidden")}>
-      <div className="flex justify-center items-center text-2xl w-full h-full">
+    <div className={"absolute inset-0 m-4 bg-equator-50 border border-dashed border-equator-300 duration-200 "
+      + (isDraggingGlobal ? "" : "hidden ")
+      + (isDraggingOver ? "bg-equator-300" : "")}>
+      <div className={"flex justify-center items-center text-2xl w-full h-full "}>
         Drop files here
       </div>
     </div>

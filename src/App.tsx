@@ -5,6 +5,7 @@ import { useEffect } from 'react';
 import ReceiveBubble from './components/ReceiveBubble';
 import { readUserIDFromParams } from './misc/misc';
 import { GithubIcon } from './misc/icons/GithubIcon';
+import { IsDraggingContextProvider } from './misc/IsDraggingContext';
 
 // The main page, layout
 function Page() {
@@ -48,9 +49,11 @@ function Page() {
 function App() {
 
   return (
-    <ClientProvider>
-      <Page />
-    </ClientProvider>
+    <IsDraggingContextProvider>
+      <ClientProvider>
+        <Page />
+      </ClientProvider>
+    </IsDraggingContextProvider>
   );
 }
 
