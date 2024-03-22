@@ -1,0 +1,15 @@
+{
+  "files": {
+    "main.css": "/Katana/static/css/main.8c411b60.css",
+    "main.js": "/Katana/static/js/main.3ae4f019.js",
+    "static/js/787.84f3cb6b.chunk.js": "/Katana/static/js/787.84f3cb6b.chunk.js",
+    "index.html": "/Katana/index.html",
+    "main.8c411b60.css.map": "/Katana/static/css/main.8c411b60.css.map",
+    "main.3ae4f019.js.map": "/Katana/static/js/main.3ae4f019.js.map",
+    "787.84f3cb6b.chunk.js.map": "/Katana/static/js/787.84f3cb6b.chunk.js.map"
+  },
+  "entrypoints": [
+    "static/css/main.8c411b60.css",
+    "static/js/main.3ae4f019.js"
+  ]
+}
